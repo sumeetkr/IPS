@@ -8,6 +8,9 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import static android.widget.Toast.LENGTH_SHORT;
 
 public class IRDataGathererService extends Service {
@@ -17,6 +20,7 @@ public class IRDataGathererService extends Service {
     // This is the object that receives interactions from clients.  See
     // RemoteService for a more complete example.
     private final IBinder mBinder = new LocalBinder();
+    private boolean isRecording = false;
 
     public IRDataGathererService() {
     }
@@ -37,7 +41,22 @@ public class IRDataGathererService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i("LocalService", "Received start id " + startId + ": " + intent);
+
+
+        if(!isRecording){
+            isRecording = true;
+
+            Log.i("LocalService", "Received start id " + startId + ": " + intent);
+        }
+
+        TimerTask timerTask = new IRDataRecorderTimerTask();
+        // running timer task as daemon thread
+        Timer timer = new Timer(true);
+        //start every 2 seconds
+        timer.scheduleAtFixedRate(timerTask, 0, 2 * 1000);
+        Log.d("IRDataGathererService", "TimerTask begins! :");
+
+
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
         return START_STICKY;

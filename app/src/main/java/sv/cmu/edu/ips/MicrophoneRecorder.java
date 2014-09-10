@@ -11,16 +11,16 @@ import android.util.Log;
 
 import java.util.LinkedList;
 
-public class AudioRecorder extends Thread {
+public class MicrophoneRecorder extends Thread {
 
-    private static final String CLASS_PREFIX = AudioRecorder.class.getName();
+    private static final String CLASS_PREFIX = MicrophoneRecorder.class.getName();
     private AudioRecord recorder = null;
     private int bufferSizeInBytes = 0;
     private int sleepInterval = 0;
     private Object syncObject = new Object();
     private boolean isRecording = false;
 
-    public static final int SAMPLING_FREQUENCY = 8000;
+    public static final int SAMPLING_FREQUENCY = 44100;
 
 
     private class ReadResult{
@@ -63,7 +63,7 @@ public class AudioRecorder extends Thread {
         }
     };
 
-    public AudioRecorder(){
+    public MicrophoneRecorder(){
         super();
         bufferSizeInBytes = AudioRecord.getMinBufferSize(
                 SAMPLING_FREQUENCY,
@@ -92,6 +92,7 @@ public class AudioRecorder extends Thread {
 
             try{
                 short[] buffer = new short[bufferSizeInBytes / 2];
+                //short[] buffer = new short[bufferSizeInBytes * 10];
                 int numSamplesRead = recorder.read(buffer, 0, buffer.length);
 
                 if(numSamplesRead == AudioRecord.ERROR_INVALID_OPERATION) {
@@ -171,7 +172,7 @@ public class AudioRecorder extends Thread {
                     SAMPLING_FREQUENCY,
                     AudioFormat.CHANNEL_IN_MONO,
                     AudioFormat.ENCODING_PCM_16BIT,
-                    bufferSizeInBytes * 4);
+                    bufferSizeInBytes * 20);
         }catch(IllegalArgumentException ex){
             ex.printStackTrace();
             Log.d(LogUtil.TAG, ex.toString());

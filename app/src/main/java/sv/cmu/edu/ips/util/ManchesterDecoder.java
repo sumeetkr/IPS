@@ -1,4 +1,4 @@
-package sv.cmu.edu.ips;
+package sv.cmu.edu.ips.util;
 
 /**
  * Created by sumeet on 9/8/14.

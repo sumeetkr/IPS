@@ -150,6 +150,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
             // service that we know is running in our own process, we can
             // cast its IBinder to a concrete class and directly access it.
             mBoundService = ((IRDataGathererService.LocalBinder)service).getService();
+            Intent startIntent = new Intent();
+            mBoundService.onStartCommand(startIntent,0,0);
             Log.d(LogUtil.TAG," Service Connected");
         }
 
@@ -159,6 +161,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
             // unexpectedly disconnected -- that is, its process crashed.
             // Because it is running in our same process, we should never
             // see this happen.
+
             mBoundService = null;
             Log.d(LogUtil.TAG, "Service disconnected");
         }
