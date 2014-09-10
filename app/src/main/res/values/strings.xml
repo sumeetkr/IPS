@@ -8,5 +8,10 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="local_service_started">IRDataGatherer Started</string>
+    <string name="local_service_stopped">IRDataGathererStopped</string>
+    <string name="local_service_label">IRDataGatherer Service</string>
+    <string name="local_service_connected">Loca; Service Connected</string>
+    <string name="local_service_disconnected">Local service disconnected</string>
 
 </resources>
