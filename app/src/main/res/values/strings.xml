@@ -13,5 +13,6 @@
     <string name="local_service_label">IRDataGatherer Service</string>
     <string name="local_service_connected">Loca; Service Connected</string>
     <string name="local_service_disconnected">Local service disconnected</string>
+    <string name="title_activity_location">CMU Indoor Map</string>
 
 </resources>

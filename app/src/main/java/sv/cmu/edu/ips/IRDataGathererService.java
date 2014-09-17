@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import sv.cmu.edu.ips.data.AudioData;
+import sv.cmu.edu.ips.util.IPSFileWriter;
 import sv.cmu.edu.ips.util.SignalAnalyzer;
 
 import static android.widget.Toast.LENGTH_SHORT;
@@ -32,6 +33,7 @@ public class IRDataGathererService extends Service {
     private int dataCount;
     private Boolean isListening;
     private String logLabel = "IRDataGathererService";
+    private boolean isDataToBeWrittenToFile = false;
 
 
     public IRDataGathererService() {
@@ -135,13 +137,27 @@ public class IRDataGathererService extends Service {
             @Override
             protected void onRecordEnded(){
                 super.onRecordEnded();
-                String beaconId = SignalAnalyzer.getBeaconIdFromRawSignal(super.getAggregatedData());
-                Log.d(logLabel, "Got beacon ID "+ beaconId);
-                if(!beaconId.isEmpty()){
-                    Intent intent = new Intent("my-event");
-                    // add data
-                    intent.putExtra("message", beaconId);
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+
+                if(isDataToBeWrittenToFile) {
+                    IPSFileWriter fileWriter = new IPSFileWriter(String.valueOf(System.currentTimeMillis())+".pcm");
+                    fileWriter.appendText(Arrays.toString(super.getAggregatedData()));
+                    fileWriter.close();
+                }
+
+                try {
+                    String beaconId = SignalAnalyzer.getBeaconIdFromRawSignal(super.getAggregatedData());
+                    Log.d(logLabel, "Got beacon ID "+ beaconId);
+                    if(!beaconId.isEmpty()){
+                        Intent intent = new Intent("my-event");
+                        // add data
+                        intent.putExtra("message", beaconId);
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                    }
+                }catch (Exception e) {
+                    Log.d(logLabel, "exception "+ e.getMessage());
+                    IPSFileWriter fileWriter = new IPSFileWriter(String.valueOf("error.log"));
+                    fileWriter.appendText(e.getMessage());
+                    fileWriter.close();
                 }
             }
 

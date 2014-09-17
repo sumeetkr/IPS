@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
@@ -19,6 +20,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.util.Locale;
 
@@ -29,6 +31,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
     ViewPager mViewPager;
     private IRDataGathererService mBoundService;
     private boolean mIsBound;
+    // handler for received Intents for the "my-event" event
+    private BroadcastReceiver mMessageReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +70,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         }
 
         doBindService();
+        mMessageReceiver = new BeaconIdReceiver(new Handler());
     }
 
 
@@ -210,12 +215,26 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         super.onPause();
     }
 
-    // handler for received Intents for the "my-event" event
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    public static class BeaconIdReceiver extends BroadcastReceiver {
+        private final Handler handler;
+
+        public BeaconIdReceiver(Handler handler) {
+            this.handler = handler;
+        }
+
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(final Context context, Intent intent) {
             // Extract data included in the Intent
-            String message = intent.getStringExtra("message");
+            final String message = intent.getStringExtra("message");
+
+            // Post the UI updating code to our Handler
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(context, "Found Beacon: " + message, Toast.LENGTH_SHORT).show();
+                }
+            });
+
             Log.d("receiver", "Got message: " + message);
         }
     };
