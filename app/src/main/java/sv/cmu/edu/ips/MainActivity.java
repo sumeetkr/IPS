@@ -17,12 +17,16 @@ import android.os.IBinder;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import java.util.Locale;
+
+import sv.cmu.edu.ips.data.ScannerData;
+import sv.cmu.edu.ips.util.JsonSender;
 
 
 public class MainActivity extends Activity implements ActionBar.TabListener {
@@ -31,8 +35,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
     ViewPager mViewPager;
     private IRDataGathererService mBoundService;
     private boolean mIsBound;
-    // handler for received Intents for the "my-event" event
     private BroadcastReceiver mMessageReceiver;
+    private String deviceId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +74,11 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         }
 
         doBindService();
-        mMessageReceiver = new BeaconIdReceiver(new Handler());
+
+        TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+        deviceId = telephonyManager.getDeviceId();
+        mMessageReceiver = new BeaconIdReceiver(new Handler(), deviceId);
+
     }
 
 
@@ -217,9 +225,11 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
 
     public static class BeaconIdReceiver extends BroadcastReceiver {
         private final Handler handler;
+        private final String deviceId;
 
-        public BeaconIdReceiver(Handler handler) {
+        public BeaconIdReceiver(Handler handler, String deviceId) {
             this.handler = handler;
+            this.deviceId = deviceId;
         }
 
         @Override
@@ -234,6 +244,12 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
                     Toast.makeText(context, "Found Beacon: " + message, Toast.LENGTH_SHORT).show();
                 }
             });
+
+            ScannerData data = new ScannerData();
+            data.setBeaconId(message);
+            data.setIdentifier(this.deviceId);
+            Log.d("Sending Json ", data.getJSON());
+            JsonSender.sendToServer(data.getJSON(), context, "http://code.sumeetkumar.in/scanners/update_scanner_beacon");
 
             Log.d("receiver", "Got message: " + message);
         }
