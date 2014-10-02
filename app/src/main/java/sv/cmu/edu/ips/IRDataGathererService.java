@@ -37,7 +37,6 @@ public class IRDataGathererService extends Service {
 
 
     public IRDataGathererService() {
-
         isRecording = false;
     }
 
@@ -147,7 +146,7 @@ public class IRDataGathererService extends Service {
                 try {
                     String beaconId = SignalAnalyzer.getBeaconIdFromRawSignal(super.getAggregatedData());
                     Log.d(logLabel, "Got beacon ID "+ beaconId);
-                    if(!beaconId.isEmpty()){
+                    if(!beaconId.isEmpty() && beaconId.length()>5){
                         Intent intent = new Intent("my-event");
                         // add data
                         intent.putExtra("message", beaconId);

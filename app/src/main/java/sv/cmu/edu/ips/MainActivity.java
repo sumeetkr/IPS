@@ -1,7 +1,6 @@
 package sv.cmu.edu.ips;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -11,10 +10,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.telephony.TelephonyManager;
@@ -26,10 +27,11 @@ import android.widget.Toast;
 import java.util.Locale;
 
 import sv.cmu.edu.ips.data.ScannerData;
+import sv.cmu.edu.ips.util.Constants;
 import sv.cmu.edu.ips.util.JsonSender;
 
 
-public class MainActivity extends Activity implements ActionBar.TabListener {
+public class MainActivity extends FragmentActivity implements ActionBar.TabListener , SignalFragment.OnFragmentInteractionListener {
 
     SectionsPagerAdapter mSectionsPagerAdapter;
     ViewPager mViewPager;
@@ -37,6 +39,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
     private boolean mIsBound;
     private BroadcastReceiver mMessageReceiver;
     private String deviceId;
+    public static android.support.v4.app.FragmentManager fragmentManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +49,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         // Set up the action bar.
         final ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+        fragmentManager = getSupportFragmentManager();
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -77,7 +82,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
 
         TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
         deviceId = telephonyManager.getDeviceId();
-        mMessageReceiver = new BeaconIdReceiver(new Handler(), deviceId);
+        mMessageReceiver = new NewBeaconReceiver(new Handler(), deviceId);
 
     }
 
@@ -114,6 +119,11 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
 
     @Override
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
@@ -184,12 +194,10 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
     };
 
     void doBindService() {
-        // Establish a connection with the service.  We use an explicit
-        // class name because we want a specific service implementation that
-        // we know will be running in our own process (and thus won't be
-        // supporting component replacement by other applications).
         bindService(new Intent(this,
-                IRDataGathererService.class), mConnection, Context.BIND_AUTO_CREATE);
+                IRDataGathererService.class),
+                mConnection,
+                Context.BIND_AUTO_CREATE);
         mIsBound = true;
     }
 
@@ -223,11 +231,24 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         super.onPause();
     }
 
-    public static class BeaconIdReceiver extends BroadcastReceiver {
+    public android.support.v4.app.FragmentManager getMapFragmentManager(){
+          return getSupportFragmentManager();
+    }
+
+    protected void onNewBeaconFound(String beaconId){
+//        SignalFragment signalFrag = (SignalFragment)getFragmentManager().findFragmentById(1);
+        SignalFragment signalFrag = (SignalFragment) mSectionsPagerAdapter.getItem(1);
+//        if(signalFrag != null){
+            signalFrag.updateNewBeaconId(beaconId);
+//        }
+    }
+
+    public class NewBeaconReceiver extends BroadcastReceiver {
         private final Handler handler;
         private final String deviceId;
+        private String lastSentBeaconId ="";
 
-        public BeaconIdReceiver(Handler handler, String deviceId) {
+        public NewBeaconReceiver(Handler handler, String deviceId) {
             this.handler = handler;
             this.deviceId = deviceId;
         }
@@ -235,23 +256,30 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         @Override
         public void onReceive(final Context context, Intent intent) {
             // Extract data included in the Intent
-            final String message = intent.getStringExtra("message");
+            final String beaconId = intent.getStringExtra("message");
 
-            // Post the UI updating code to our Handler
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(context, "Found Beacon: " + message, Toast.LENGTH_SHORT).show();
-                }
-            });
+            if(beaconId != null && !beaconId.isEmpty() && beaconId.compareTo(lastSentBeaconId)!=0){
+                // Post the UI updating code to our Handler
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context, "Found New Beacon: " + beaconId, Toast.LENGTH_SHORT).show();
+                    }
+                });
 
+                onNewBeaconFound(beaconId);
+                sendNewBeaconIdToServer(context, beaconId);
+            }
+        }
+
+        private void sendNewBeaconIdToServer(Context context, String beaconId) {
             ScannerData data = new ScannerData();
-            data.setBeaconId(message);
+            data.setBeaconId(beaconId);
             data.setIdentifier(this.deviceId);
             Log.d("Sending Json ", data.getJSON());
-            JsonSender.sendToServer(data.getJSON(), context, "http://code.sumeetkumar.in/scanners/update_scanner_beacon");
-
-            Log.d("receiver", "Got message: " + message);
+            JsonSender.sendToServer(data.getJSON(), context, Constants.URL_TO_SEND_SCANNER_DATA);
+            lastSentBeaconId = beaconId;
+            Log.d("receiver", "Sent beacon id: " + beaconId);
         }
     };
 

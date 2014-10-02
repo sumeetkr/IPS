@@ -23,6 +23,7 @@ public class JsonSender {
 
             Log.w("IPS JsonSender ", data);
             AsyncHttpClient client = new AsyncHttpClient();
+
             client.post(context, server_url, entity, "application/json", new AsyncHttpResponseHandler() {
                 @Override
                 public void onSuccess(String response) {
