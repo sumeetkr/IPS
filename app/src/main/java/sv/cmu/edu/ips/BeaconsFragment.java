@@ -29,7 +29,7 @@ import sv.cmu.edu.ips.data.BeaconData;
 import sv.cmu.edu.ips.util.Constants;
 import sv.cmu.edu.ips.util.JsonSender;
 
-public class SignalFragment extends Fragment {
+public class BeaconsFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
     private final String BEACON_ID = "Beacon Id: ";
@@ -49,7 +49,7 @@ public class SignalFragment extends Fragment {
         if (container == null) {
             return null;
         }
-        view = (RelativeLayout) inflater.inflate(R.layout.fragment_signal, container, false);
+        view = (RelativeLayout) inflater.inflate(R.layout.fragment_beacons, container, false);
         latitude = 37.410372;
         longitude = -122.059683;
 
@@ -120,6 +120,8 @@ public class SignalFragment extends Fragment {
             }
         });
 
+        //need to update the location view
+        JsonSender.getDataFromServer(getActivity(), Constants.URL_TO_GET_LOCATION);
     }
 
     private void sendNewBeaconIdToServer(Context context) {
@@ -135,9 +137,14 @@ public class SignalFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         if (map != null) {
-            MainActivity.fragmentManager.beginTransaction()
-                    .remove(MainActivity.fragmentManager.findFragmentById(R.id.map)).commit();
-            map = null;
+            try{
+                MainActivity.fragmentManager.beginTransaction()
+                        .remove(MainActivity.fragmentManager.findFragmentById(R.id.map)).commit();
+                map = null;
+            }
+            catch(Exception ex){
+                Log.d("IPS", ex.getMessage());
+            }
         }
     }
 
@@ -174,6 +181,7 @@ public class SignalFragment extends Fragment {
     }
 
     public void addMarker(LatLng latlng){
+        map.clear();
         map.addMarker(new MarkerOptions().position(latlng)
                 .title(beaconId).snippet(" Bldg .., Room .."));
     }

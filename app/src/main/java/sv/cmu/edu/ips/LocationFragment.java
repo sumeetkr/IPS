@@ -1,27 +1,33 @@
 package sv.cmu.edu.ips;
 
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.TextView;
 
 import sv.cmu.edu.ips.util.Constants;
+import sv.cmu.edu.ips.util.JsonSender;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link LocationFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link LocationFragment#newInstance} factory method to
- * create an instance of this fragment.
- *
- */
 public class LocationFragment extends Fragment {
+
+    private BroadcastReceiver mMessageReceiver;
+    private BroadcastReceiver mLocationReceiver;
+    private Handler handler;
+    private final String LOCATION= "Your location: ";
+    private String beaconId;
+
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
@@ -59,7 +65,6 @@ public class LocationFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
     }
 
     @Override
@@ -75,14 +80,49 @@ public class LocationFragment extends Fragment {
             wv.loadUrl(Constants.URL_TO_DISPLAY_LOCATION);
 
         }
+
+        handler = new Handler();
+        mMessageReceiver = new NewBeaconReceiver(handler);
+        mLocationReceiver = new NewLocationReceiver(handler);
         return v;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+    @Override
+    public void onResume(){
+        super.onResume();
+        // Register mMessageReceiver to receive messages.
+        LocalBroadcastManager.getInstance(this.getActivity().getApplicationContext()).registerReceiver(mMessageReceiver,
+                new IntentFilter("my-event"));
+
+        LocalBroadcastManager.getInstance(this.getActivity().getApplicationContext()).registerReceiver(mLocationReceiver,
+                new IntentFilter("new-location-event"));
+
+//        updateLocation(beaconId);
+    }
+
+    private void updateLocation(final String location){
+
+        if(location != null && !location.isEmpty() ){
+            Log.d("IPS", "Changing location for beacon id: " + beaconId + " location: " + location);
+
+            final TextView view = (TextView) this.getView().findViewById(R.id.txtLocation);
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    String loc = location.split("\"")[location.split("\"").length -2];
+                    view.setText(LOCATION + loc);
+                }
+            });
         }
+
+    }
+
+    @Override
+    public void onPause(){
+        LocalBroadcastManager.getInstance(this.getActivity().getApplicationContext()).unregisterReceiver(mMessageReceiver);
+        LocalBroadcastManager.getInstance(this.getActivity().getApplicationContext()).unregisterReceiver(mLocationReceiver);
+        super.onPause();
+
     }
 
     private class MyBrowser extends WebViewClient {
@@ -93,8 +133,44 @@ public class LocationFragment extends Fragment {
         }
     }
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         public void onFragmentInteraction(Uri uri);
     }
+
+    public class NewBeaconReceiver extends BroadcastReceiver {
+        private final Handler handler;
+        private String lastSentBeaconId ="";
+
+        public NewBeaconReceiver(Handler handler) {
+            this.handler = handler;
+        }
+
+        @Override
+        public void onReceive(final Context context, Intent intent) {
+            // Extract data included in the Intent
+            Log.d("IPS", "new beacon for location fragment");
+            final String beaconId = intent.getStringExtra("message");
+            if(beaconId != null && !beaconId.isEmpty() && beaconId.compareTo(lastSentBeaconId)!=0){
+                JsonSender.getDataFromServer(getActivity(), Constants.URL_TO_GET_LOCATION);
+                lastSentBeaconId = beaconId;
+            }
+        }
+
+    };
+
+    public class NewLocationReceiver extends BroadcastReceiver {
+        private final Handler handler;
+
+        public NewLocationReceiver(Handler handler) {
+            this.handler = handler;
+        }
+
+        @Override
+        public void onReceive(final Context context, Intent intent) {
+            // Extract data included in the Intent
+            Log.d("IPS", "new location for location fragment");
+            final String json = intent.getStringExtra("message");
+            updateLocation(json);
+        }
+    };
 
 }

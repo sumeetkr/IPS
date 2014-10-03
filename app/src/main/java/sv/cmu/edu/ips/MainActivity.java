@@ -31,7 +31,7 @@ import sv.cmu.edu.ips.util.Constants;
 import sv.cmu.edu.ips.util.JsonSender;
 
 
-public class MainActivity extends FragmentActivity implements ActionBar.TabListener , SignalFragment.OnFragmentInteractionListener {
+public class MainActivity extends FragmentActivity implements ActionBar.TabListener , BeaconsFragment.OnFragmentInteractionListener {
 
     SectionsPagerAdapter mSectionsPagerAdapter;
     ViewPager mViewPager;
@@ -138,7 +138,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                 case 0:
                     return LocationFragment.newInstance("name1", "name2");
                 case 1:
-                    return new SignalFragment();
+                    return new BeaconsFragment();
                 case 2:
                     return new PlaceholderFragment();
             }
@@ -148,7 +148,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 3;
+            return 2;
         }
 
         @Override
@@ -159,8 +159,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                     return getString(R.string.title_section1).toUpperCase(l);
                 case 1:
                     return getString(R.string.title_section2).toUpperCase(l);
-                case 2:
-                    return getString(R.string.title_section3).toUpperCase(l);
+//                case 2:
+//                    return getString(R.string.title_section3).toUpperCase(l);
             }
             return null;
         }
@@ -237,7 +237,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
     protected void onNewBeaconFound(String beaconId){
 //        SignalFragment signalFrag = (SignalFragment)getFragmentManager().findFragmentById(1);
-        SignalFragment signalFrag = (SignalFragment) mSectionsPagerAdapter.getItem(1);
+        BeaconsFragment signalFrag = (BeaconsFragment) mSectionsPagerAdapter.getItem(1);
 //        if(signalFrag != null){
             signalFrag.updateNewBeaconId(beaconId);
 //        }
@@ -269,6 +269,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
                 onNewBeaconFound(beaconId);
                 sendNewBeaconIdToServer(context, beaconId);
+                lastSentBeaconId = beaconId;
             }
         }
 
@@ -278,7 +279,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
             data.setIdentifier(this.deviceId);
             Log.d("Sending Json ", data.getJSON());
             JsonSender.sendToServer(data.getJSON(), context, Constants.URL_TO_SEND_SCANNER_DATA);
-            lastSentBeaconId = beaconId;
             Log.d("receiver", "Sent beacon id: " + beaconId);
         }
     };

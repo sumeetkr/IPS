@@ -168,7 +168,7 @@ public class MicrophoneRecorder extends Thread {
                     AudioFormat.ENCODING_PCM_16BIT);
 
             this.recorder = new AudioRecord(
-                    MediaRecorder.AudioSource.DEFAULT,
+                    MediaRecorder.AudioSource.MIC,
                     SAMPLING_FREQUENCY,
                     AudioFormat.CHANNEL_IN_MONO,
                     AudioFormat.ENCODING_PCM_16BIT,
