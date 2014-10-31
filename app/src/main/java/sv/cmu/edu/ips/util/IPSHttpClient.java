@@ -15,7 +15,7 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 import org.apache.http.entity.StringEntity;
 
 
-public class JsonSender {
+public class IPSHttpClient {
 
     // http://loopj.com/android-async-http/
     public static String sendToServer(String data, Context context ,String server_url) {
@@ -29,13 +29,13 @@ public class JsonSender {
             client.post(context, server_url, entity, "application/json", new AsyncHttpResponseHandler() {
                 @Override
                 public void onSuccess(String response) {
-                    Log.w("IPS JsonSender","Success - "+response);
+                    Log.w("IPS JsonSender result","Success - "+response);
                 }
 
                 @Override
                 public void onFailure(int statusCode, org.apache.http.Header[] headers, byte[] errorResponse, Throwable e) {
                     // called when response HTTP status is "4XX" (eg. 401, 403, 404)
-                    Log.w("IPS JsonSender","Failure in sending - "+ "Status code -" +statusCode+ " Error response -"+  errorResponse);
+                    Log.w("IPS JsonSender result","Failure in sending - "+ "Status code -" +statusCode+ " Error response -"+  errorResponse);
                 }
             });
         } catch (Exception e) {

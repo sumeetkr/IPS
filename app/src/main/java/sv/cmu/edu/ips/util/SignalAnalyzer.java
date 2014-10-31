@@ -3,9 +3,8 @@ package sv.cmu.edu.ips.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-/**
- * Created by sumeet on 9/13/14.
- */
+import sv.cmu.edu.ips.data.SignalData;
+
 public class SignalAnalyzer {
     private static int noiseThresholdAmplitude = 480;
     private static int clockLengthGuess = 23;
@@ -130,6 +129,69 @@ public class SignalAnalyzer {
         return codedValue;
     }
 
+    public static String getManchesterEncodedStringUsingPhaseLock(short[] rawSignalData) {
+        String codedValue = "";
+
+        //get the indexes where it is changing sign
+        //signal is either 00, 11, 0, 1 depending on the width
+
+        ArrayList<Integer> indexesOfSignChange = new ArrayList<Integer>();
+        indexesOfSignChange.add(0);
+
+        for (int i = 2; i < rawSignalData.length -3; i++) {
+            //if last three values are -ve and next three are +ve, note index
+            if(rawSignalData[i-2]<0 && rawSignalData[i-1]<0 && rawSignalData[i]<0
+                    && rawSignalData[i+1]>0 && rawSignalData[i+2]>0 && rawSignalData[i+3]>0){
+                indexesOfSignChange.add(i);
+            }
+
+            if(rawSignalData[i-2]>0 && rawSignalData[i-1]>0 && rawSignalData[i]>0
+                    && rawSignalData[i+1]<0 && rawSignalData[i+2]<0 && rawSignalData[i+3]<0){
+
+                indexesOfSignChange.add(i);
+            }
+            //if last three values are +ve and next three are -ve, note index
+        }
+
+//        codedValue = indexesOfSignChange.toString();
+        //get phase width i.e. width of first four changes
+        int avgPhaseWidth = 0;
+        Integer sum = 0;
+        for (int i = 1; i < 6 ; i++) {
+            sum = sum + (indexesOfSignChange.get(i) - indexesOfSignChange.get(i-1));
+        }
+        avgPhaseWidth = sum/5;
+        double widthThreshold = 0.85*avgPhaseWidth;
+
+//        codedValue = codedValue + " --- ";
+        for (int i = 0; i < indexesOfSignChange.size() -1; i++) {
+            //first find if values are -ve or +ve
+            short localSum = 0;
+            for (int j = indexesOfSignChange.get(i); j < indexesOfSignChange.get(i+1); j++) {
+                localSum = rawSignalData[j];
+            }
+
+            //if approx == avgPhaseWidth then 11 or 00 else (1 or 0)
+            int width = indexesOfSignChange.get(i+1) - indexesOfSignChange.get(i);
+            if(localSum<0){
+                if(width < widthThreshold){
+                    codedValue = codedValue + "0";
+                }else{
+                    codedValue = codedValue + "00";
+                }
+            }else{
+                if(width < widthThreshold){
+                    codedValue = codedValue + "1";
+                }else{
+                    codedValue = codedValue + "11";
+                }
+            }
+
+        }
+
+        return codedValue;// + "  " + avgPhaseWidth;
+    }
+
     public static String binaryToManchesterEncoding(String binaryString) {
         String encodedString = "";
         ArrayList<Integer> binaryIntegers = new ArrayList<Integer>();
@@ -150,14 +212,14 @@ public class SignalAnalyzer {
 
     public static String manchesterToBinaryDecoding(String manchesterString) throws Exception {
         String decodedString = "";
-        //sometimes there is an extra 0 at the beginning
-        if ("00".compareTo(manchesterString.substring(0, 2)) == 0) {
-            manchesterString = manchesterString.substring(1);
-        }
-        if ("0".compareTo(manchesterString.substring(0, 2)) == 0) {
-            manchesterString = manchesterString.substring(1);
-        }
+        manchesterString = preprocessMancheterString(manchesterString);
+        decodedString = decodeToBinary(manchesterString, decodedString);
 
+        return decodedString;
+    }
+
+    private static String decodeToBinary(String manchesterString,
+                                         String decodedString) throws Exception {
         ArrayList<Integer> binaryIntegers = new ArrayList<Integer>();
         for (char chr : manchesterString.toCharArray()) {
             Integer integer = Integer.decode(String.valueOf(chr));
@@ -170,11 +232,23 @@ public class SignalAnalyzer {
             } else if (binaryIntegers.get(i).intValue() == 1 && binaryIntegers.get(i + 1).intValue() == 0) {
                 decodedString = decodedString.concat("1");
             } else {
-                throw new Exception("Incorrect format for Manchester decoding at index : " + i + "  " + manchesterString);
+                if(i<120){
+                    throw new Exception("Incorrect format for Manchester decoding at index : " + i + "  " + manchesterString);
+                }
             }
         }
-
         return decodedString;
+    }
+
+    private static String preprocessMancheterString(String manchesterString) {
+//		sometimes there is an extra 0 at the beginning
+        if ("00".compareTo(manchesterString.substring(0, 2)) == 0) {
+            manchesterString = manchesterString.substring(1);
+        }
+        if ("0".compareTo(manchesterString.substring(0, 2)) == 0) {
+            manchesterString = manchesterString.substring(1);
+        }
+        return manchesterString;
     }
 
     public static long getLongFromBinary(String binaryString) {
@@ -200,21 +274,32 @@ public class SignalAnalyzer {
         return j;
     }
 
-    public static String getBeaconIdFromRawSignal(short[] data) throws Exception {
-        String beacodId = "";
+    public static SignalData getSignalInfoStringFromRawSignal(short[] data) throws Exception {
+        String beaconId = "";
+        double amplitude = 100.00;
+
+        short[] signalData = new short[0];
         try {
             short[] dataCopy = data.clone();
             short[] filteredData = lowPassFilter(dataCopy);
-            short[] signalData = getSignalSegment(filteredData, data);
-            short[] digitalizedData = digitilizeData(signalData);
+            signalData = getSignalSegment(filteredData, data);
+
+            //leave original signalData to be used in case of exception, clone it
+            short[] digitalizedData = digitilizeData(signalData.clone());
             String codedData = getManchesterEncodedString(digitalizedData);
             String decodedValue = manchesterToBinaryDecoding(codedData.substring(1));
-            beacodId = String.valueOf(getBeconIdFromDecodedString(decodedValue));
+            beaconId = String.valueOf(getBeconIdFromDecodedString(decodedValue));
 
         } catch (Exception e) {
-            throw e;
+            try{
+                String codedData = getManchesterEncodedStringUsingPhaseLock(signalData);
+                String decodedValue = manchesterToBinaryDecoding(codedData.substring(1));
+                beaconId = String.valueOf(getBeconIdFromDecodedString(decodedValue));
+            }catch(Exception ex){
+                throw ex;
+            }
         }
 
-        return beacodId;
+        return new SignalData(amplitude, beaconId);
     }
 }

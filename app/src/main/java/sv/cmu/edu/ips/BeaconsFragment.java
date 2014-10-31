@@ -27,7 +27,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import sv.cmu.edu.ips.data.BeaconData;
 import sv.cmu.edu.ips.util.Constants;
-import sv.cmu.edu.ips.util.JsonSender;
+import sv.cmu.edu.ips.util.IPSHttpClient;
 
 public class BeaconsFragment extends Fragment {
 
@@ -108,7 +108,7 @@ public class BeaconsFragment extends Fragment {
     private void saveLabel(){
         Log.d("IPS", "Saving label info" );
         EditText editText = (EditText) this.getView().findViewById(R.id.editText);
-        editText.setFocusable(false);
+//        editText.setFocusable(false);
         label = editText.getText().toString();
 
         //Send data to server
@@ -121,14 +121,22 @@ public class BeaconsFragment extends Fragment {
         });
 
         //need to update the location view
-        JsonSender.getDataFromServer(getActivity(), Constants.URL_TO_GET_LOCATION);
+//        JsonSender.getDataFromServer(getActivity(), Constants.URL_TO_GET_LOCATION);
+
+        //Raise event for location to update its label
+        Intent intent = new Intent("new-location-event");
+        intent.putExtra("message", label);
+        LocalBroadcastManager.getInstance(this.getActivity()).sendBroadcast(intent);
     }
 
     private void sendNewBeaconIdToServer(Context context) {
-        BeaconData data = new BeaconData(beaconId,String.valueOf(latitude), String.valueOf(longitude),label);
-        Log.d("Sending beacon json info", data.getJSON());
-        JsonSender.sendToServer(data.getJSON(), context, Constants.URL_TO_SEND_BEACON_DATA);
-        Log.d("receiver", "Sent beacon json for " + beaconId);
+        if(beaconId != null && !beaconId.isEmpty() && label != null && !label.isEmpty()
+                && String.valueOf(latitude) != null && !String.valueOf(longitude).isEmpty()){
+            BeaconData data = new BeaconData(beaconId,String.valueOf(latitude), String.valueOf(longitude),label);
+            Log.d("Sending beacon json info", data.getJSON());
+            IPSHttpClient.sendToServer(data.getJSON(), context, Constants.URL_TO_SEND_BEACON_DATA);
+            Log.d("receiver", "Sent beacon json for " + beaconId);
+        }
     }
     /**** The mapfragment's id must be removed from the FragmentManager
      **** or else if the same it is passed on the next time then
@@ -189,7 +197,7 @@ public class BeaconsFragment extends Fragment {
     public void makeLabeltextFocussableForEdit(){
         Log.d("IPS", "Making label text focusable for edit :" );
         EditText editText = (EditText) this.getView().findViewById(R.id.editText);
-        editText.setFocusable(true);
+//        editText.setFocusable(true);
 
     }
     public class NewBeaconReceiver extends BroadcastReceiver {

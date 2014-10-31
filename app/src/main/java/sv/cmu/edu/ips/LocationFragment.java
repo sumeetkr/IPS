@@ -18,7 +18,7 @@ import android.webkit.WebViewClient;
 import android.widget.TextView;
 
 import sv.cmu.edu.ips.util.Constants;
-import sv.cmu.edu.ips.util.JsonSender;
+import sv.cmu.edu.ips.util.IPSHttpClient;
 
 public class LocationFragment extends Fragment {
 
@@ -26,6 +26,7 @@ public class LocationFragment extends Fragment {
     private BroadcastReceiver mLocationReceiver;
     private Handler handler;
     private final String LOCATION= "Your location: ";
+    private final String SIGNAL_STRENGTH_CMU_IPS= "Signal Strength: CMU IPS ";
     private String beaconId;
 
     private static final String ARG_PARAM1 = "param1";
@@ -109,7 +110,16 @@ public class LocationFragment extends Fragment {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    String loc = location.split("\"")[location.split("\"").length -2];
+                    String [] locs = location.split("\"");
+                    int len = locs.length;
+                    String loc = "Not Available - Update using Beacons tab";
+                    if(locs.length > 1){
+                        loc = locs[len -2];
+                    }else{
+                        if(location.length() > 3){
+                            loc = location;
+                        }
+                    }
                     view.setText(LOCATION + loc);
                 }
             });
@@ -150,7 +160,7 @@ public class LocationFragment extends Fragment {
             Log.d("IPS", "new beacon for location fragment");
             final String beaconId = intent.getStringExtra("message");
             if(beaconId != null && !beaconId.isEmpty() && beaconId.compareTo(lastSentBeaconId)!=0){
-                JsonSender.getDataFromServer(getActivity(), Constants.URL_TO_GET_LOCATION);
+                IPSHttpClient.getDataFromServer(getActivity(), Constants.URL_TO_GET_LOCATION);
                 lastSentBeaconId = beaconId;
             }
         }

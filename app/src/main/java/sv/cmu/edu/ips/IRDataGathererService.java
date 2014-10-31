@@ -15,7 +15,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import sv.cmu.edu.ips.data.AudioData;
+import sv.cmu.edu.ips.data.SignalData;
 import sv.cmu.edu.ips.util.IPSFileWriter;
+import sv.cmu.edu.ips.util.LogUtil;
 import sv.cmu.edu.ips.util.SignalAnalyzer;
 
 import static android.widget.Toast.LENGTH_SHORT;
@@ -27,9 +29,9 @@ public class IRDataGathererService extends Service {
     // This is the object that receives interactions from clients.  See
     // RemoteService for a more complete example.
     private final IBinder mBinder = new LocalBinder();
-    private boolean isRecording = false;
+    private static boolean isRecording = false;
     private Handler handler;
-    private IRDataRecorder dataRecorder;
+    private static IRDataRecorder dataRecorder;
     private int dataCount;
     private Boolean isListening;
     private String logLabel = "IRDataGathererService";
@@ -90,16 +92,13 @@ public class IRDataGathererService extends Service {
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-      /* do what you need to do */
-      //      foobar();
-      /* and here comes the "trick" */
             if(isRecording){
                 //stop recording
                 stopRecording();
                 isRecording= false;
                 Log.d("IRDataGathererService", "Recording stopped! :");
                 //start recording after 3 secs
-                handler.postDelayed(this, 3000);
+                handler.postDelayed(this, 1000);
             }else{
                 //start recording
                 isRecording = true;
@@ -117,6 +116,7 @@ public class IRDataGathererService extends Service {
         dataCount = 0;
         final Context context = this;
         dataRecorder = new IRDataRecorder() {
+            int noOfInvalidBeaconFound =0;
             int frameIndex = 0;
             ArrayList<AudioData> aggregatedData= new ArrayList<AudioData>();
 
@@ -129,8 +129,12 @@ public class IRDataGathererService extends Service {
 
                 AudioData audioData = new AudioData(timestamp, data);
                 aggregatedData.add(audioData);
-                Log.d(logLabel, "data length"+ data.length);
+                Log.d(logLabel, "data length"+ data.length+ " agg size " + aggregatedData.size());
                 Log.d(logLabel, Arrays.toString(data));
+                if(aggregatedData.size()>10){
+                    stopRecording();
+                    Log.d(logLabel, "forced stopping collection as index excedded 10, index :"+ aggregatedData.size());
+                }
             }
 
             @Override
@@ -144,19 +148,31 @@ public class IRDataGathererService extends Service {
                 }
 
                 try {
-                    String beaconId = SignalAnalyzer.getBeaconIdFromRawSignal(super.getAggregatedData());
+                    SignalData sigData = SignalAnalyzer.getSignalInfoStringFromRawSignal(super.getAggregatedData());
+                    String beaconId = sigData.getBeaconId();
                     Log.d(logLabel, "Got beacon ID "+ beaconId);
                     if(!beaconId.isEmpty() && beaconId.length()>5){
                         Intent intent = new Intent("my-event");
                         // add data
                         intent.putExtra("message", beaconId);
+                        intent.putExtra("amplitude", sigData.getAmplitude());
                         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                        noOfInvalidBeaconFound = 0;
+                    }else{
+                        noOfInvalidBeaconFound++;
                     }
+
+                    Log.d(logLabel, "Invalid beacons count " + noOfInvalidBeaconFound);
                 }catch (Exception e) {
                     Log.d(logLabel, "exception "+ e.getMessage());
                     IPSFileWriter fileWriter = new IPSFileWriter(String.valueOf("error.log"));
                     fileWriter.appendText(e.getMessage());
                     fileWriter.close();
+                }
+
+                if(noOfInvalidBeaconFound>10){
+                    stopRecording();
+                    Log.d(logLabel, "forced stopping collection because many invalid beacons found :"+ noOfInvalidBeaconFound);
                 }
             }
 

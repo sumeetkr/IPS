@@ -28,7 +28,8 @@ import java.util.Locale;
 
 import sv.cmu.edu.ips.data.ScannerData;
 import sv.cmu.edu.ips.util.Constants;
-import sv.cmu.edu.ips.util.JsonSender;
+import sv.cmu.edu.ips.util.IPSHttpClient;
+import sv.cmu.edu.ips.util.LogUtil;
 
 
 public class MainActivity extends FragmentActivity implements ActionBar.TabListener , BeaconsFragment.OnFragmentInteractionListener {
@@ -74,8 +75,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
             actionBar.addTab(
                     actionBar.newTab()
-                            .setText(mSectionsPagerAdapter.getPageTitle(i))
                             .setTabListener(this));
+//            .setText(mSectionsPagerAdapter.getPageTitle(i))
         }
 
         doBindService();
@@ -148,7 +149,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 2;
+            return 1;
         }
 
         @Override
@@ -188,6 +189,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
             // Because it is running in our same process, we should never
             // see this happen.
 
+            mBoundService.stopSelf();
             mBoundService = null;
             Log.d(LogUtil.TAG, "Service disconnected");
         }
@@ -203,6 +205,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
     void doUnbindService() {
         if (mIsBound) {
+//            stopService(new Intent(this,
+//                    IRDataGathererService.class));
             // Detach our existing connection.
             unbindService(mConnection);
             mIsBound = false;
@@ -219,6 +223,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     public void onResume() {
         super.onResume();
 
+        doBindService();
         // Register mMessageReceiver to receive messages.
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("my-event"));
@@ -228,6 +233,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     protected void onPause() {
         // Unregister since the activity is not visible
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+        doUnbindService();
         super.onPause();
     }
 
@@ -278,7 +284,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
             data.setBeaconId(beaconId);
             data.setIdentifier(this.deviceId);
             Log.d("Sending Json ", data.getJSON());
-            JsonSender.sendToServer(data.getJSON(), context, Constants.URL_TO_SEND_SCANNER_DATA);
+            IPSHttpClient.sendToServer(data.getJSON(), context, Constants.URL_TO_SEND_SCANNER_DATA);
             Log.d("receiver", "Sent beacon id: " + beaconId);
         }
     };

@@ -9,6 +9,11 @@ public class SignalData {
     private double length;
     private int strength;
 
+    public SignalData(double amplitude, String beaconId) {
+        this.amplitude = amplitude;
+        this.beaconId = beaconId;
+    }
+
     public String getBeaconId() {
         return beaconId;
     }

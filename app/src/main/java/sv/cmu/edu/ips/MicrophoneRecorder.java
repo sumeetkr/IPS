@@ -11,6 +11,8 @@ import android.util.Log;
 
 import java.util.LinkedList;
 
+import sv.cmu.edu.ips.util.LogUtil;
+
 public class MicrophoneRecorder extends Thread {
 
     private static final String CLASS_PREFIX = MicrophoneRecorder.class.getName();
@@ -168,7 +170,7 @@ public class MicrophoneRecorder extends Thread {
                     AudioFormat.ENCODING_PCM_16BIT);
 
             this.recorder = new AudioRecord(
-                    MediaRecorder.AudioSource.MIC,
+                    MediaRecorder.AudioSource.DEFAULT,
                     SAMPLING_FREQUENCY,
                     AudioFormat.CHANNEL_IN_MONO,
                     AudioFormat.ENCODING_PCM_16BIT,
