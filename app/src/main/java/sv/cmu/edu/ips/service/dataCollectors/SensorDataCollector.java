@@ -1,6 +1,11 @@
-package sv.cmu.edu.ips.data;
+package sv.cmu.edu.ips.service.dataCollectors;
 
 import com.google.gson.Gson;
+
+import java.util.List;
+
+import edu.mit.media.funf.json.IJsonObject;
+import sv.cmu.edu.ips.util.IPSFileWriter;
 
 /**
  * Created by sumeet on 11/9/14.
@@ -52,5 +57,22 @@ public class SensorDataCollector {
 
     public void setNoOfDataPointsToCollect(int noOfDataPointsToCollect) {
         this.noOfDataPointsToCollect = noOfDataPointsToCollect;
+    }
+
+    protected void writeDataToFile(String dataFileName, List<IJsonObject> data) {
+        IPSFileWriter fileWriter = new IPSFileWriter(dataFileName);
+
+        int i = 0;
+        for(IJsonObject obj:data){
+            if(i!=0){
+                fileWriter.appendText("," + obj.toString());
+            }else{
+                fileWriter.appendText("["+ obj.toString());
+            }
+            i++;
+        }
+
+        fileWriter.appendText("]");
+        fileWriter.close();
     }
 }

@@ -10,7 +10,7 @@ import android.widget.TextView;
 import sv.cmu.edu.ips.R;
 
 import sv.cmu.edu.ips.util.DalaCollectorsList;
-import sv.cmu.edu.ips.data.SensorDataCollector;
+import sv.cmu.edu.ips.service.dataCollectors.SensorDataCollector;
 
 /**
  * A fragment representing a single DataCollect detail screen.

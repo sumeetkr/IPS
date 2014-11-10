@@ -29,7 +29,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Collect data to improve accuracy"
+                android:text="Collect data"
                 android:id="@+id/infoText"
                 android:layout_marginLeft="20dp"
                 android:layout_marginTop="10dp"

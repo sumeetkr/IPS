@@ -12,7 +12,7 @@ import java.util.List;
 
 import sv.cmu.edu.ips.R;
 import sv.cmu.edu.ips.util.DalaCollectorsList;
-import sv.cmu.edu.ips.data.SensorDataCollector;
+import sv.cmu.edu.ips.service.dataCollectors.SensorDataCollector;
 import sv.cmu.edu.ips.util.SensorProbeListAdapter;
 
 /**

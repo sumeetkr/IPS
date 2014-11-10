@@ -10,8 +10,6 @@ import java.util.List;
 import edu.mit.media.funf.json.IJsonObject;
 import edu.mit.media.funf.probe.Probe;
 import edu.mit.media.funf.probe.builtin.MagneticFieldSensorProbe;
-import sv.cmu.edu.ips.data.SensorDataCollector;
-import sv.cmu.edu.ips.util.IPSFileWriter;
 import sv.cmu.edu.ips.util.LogUtil;
 
 /**
@@ -47,12 +45,7 @@ public class MagneticFiledDataCollector extends SensorDataCollector implements P
     @Override
     public void onDataCompleted(IJsonObject iJsonObject, JsonElement jsonElement) {
         magneticFieldSensorProbe.registerPassiveListener(this);
-
-        IPSFileWriter fileWriter = new IPSFileWriter("MagneticFiled.json");
-        for(IJsonObject obj:data){
-            fileWriter.appendText(obj.toString());
-        }
-        fileWriter.close();
+        writeDataToFile("MagneticField.json", data);
         LogUtil.log("MagneticFiled Data collection completed");
     }
 

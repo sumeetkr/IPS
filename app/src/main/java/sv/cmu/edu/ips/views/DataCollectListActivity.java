@@ -19,7 +19,7 @@ import java.util.List;
 import edu.mit.media.funf.FunfManager;
 import edu.mit.media.funf.pipeline.BasicPipeline;
 import sv.cmu.edu.ips.R;
-import sv.cmu.edu.ips.data.SensorDataCollector;
+import sv.cmu.edu.ips.service.dataCollectors.SensorDataCollector;
 import sv.cmu.edu.ips.util.IPSFileWriter;
 import sv.cmu.edu.ips.util.UserInputManager;
 
@@ -56,7 +56,8 @@ public class DataCollectListActivity extends FragmentActivity
     public static final String PIPELINE_NAME = "default";
     private Handler handler = new Handler();
     private final String LABEL_BUTTON_TEXT = "Add Label";
-    private final String START_BUTTON_TEXT = "Start";
+    private final String START_BUTTON_TEXT = "Start Collection";
+    private final String COLLECTING_BUTTON_TEXT = "Collecting Data";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +92,7 @@ public class DataCollectListActivity extends FragmentActivity
                 Button btn = (Button) v;
 
                 if(btn.getText() == START_BUTTON_TEXT){
+                    btn.setText(COLLECTING_BUTTON_TEXT);
                     handler.postDelayed(runnable, 100);
                     final List<SensorDataCollector> probes = listFragment.getActiveSensorProbes();
                     // Start lengthy operation in a background thread
@@ -192,6 +194,7 @@ public class DataCollectListActivity extends FragmentActivity
         if(pipeline != null) pipeline.onDestroy();
         funfManager = null;
         funfManagerConn = null;
+        super.onDestroy();
     }
 
     private void labelData(){

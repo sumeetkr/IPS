@@ -10,7 +10,7 @@ import android.widget.CheckBox;
 import java.util.ArrayList;
 
 import sv.cmu.edu.ips.R;
-import sv.cmu.edu.ips.data.SensorDataCollector;
+import sv.cmu.edu.ips.service.dataCollectors.SensorDataCollector;
 
 /**
  * Created by sumeet on 10/31/14.

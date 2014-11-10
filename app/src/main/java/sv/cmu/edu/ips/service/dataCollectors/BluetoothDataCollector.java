@@ -10,8 +10,6 @@ import java.util.List;
 import edu.mit.media.funf.json.IJsonObject;
 import edu.mit.media.funf.probe.Probe;
 import edu.mit.media.funf.probe.builtin.BluetoothProbe;
-import sv.cmu.edu.ips.data.SensorDataCollector;
-import sv.cmu.edu.ips.util.IPSFileWriter;
 import sv.cmu.edu.ips.util.LogUtil;
 
 /**
@@ -45,11 +43,7 @@ public class BluetoothDataCollector extends SensorDataCollector implements Probe
     public void onDataCompleted(IJsonObject iJsonObject, JsonElement jsonElement) {
         bluetoothProbe.registerPassiveListener(this);
 
-        IPSFileWriter fileWriter = new IPSFileWriter("BluetoothData.json");
-        for(IJsonObject obj:data){
-            fileWriter.appendText(obj.toString());
-        }
-        fileWriter.close();
+        writeDataToFile("BluetoothData.json", data);
         LogUtil.log(this.getClass().getName() + "Data collection completed");
     }
 

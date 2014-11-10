@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import sv.cmu.edu.ips.data.SensorDataCollector;
+import sv.cmu.edu.ips.service.dataCollectors.SensorDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.BluetoothDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.LightDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.LocationDataCollector;
