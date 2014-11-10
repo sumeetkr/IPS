@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaRecorder;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -181,7 +182,7 @@ public class IRDataGathererService extends Service {
 
         };
 
-        dataRecorder.startRecord();
+        dataRecorder.startRecord(MediaRecorder.AudioSource.DEFAULT);
         isListening = true;
         Log.d(logLabel, "started recording");
     }

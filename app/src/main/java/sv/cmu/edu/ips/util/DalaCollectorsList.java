@@ -5,13 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import sv.cmu.edu.ips.service.dataCollectors.SensorDataCollector;
+import sv.cmu.edu.ips.service.dataCollectors.AudioDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.BluetoothDataCollector;
+import sv.cmu.edu.ips.service.dataCollectors.IRDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.LightDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.LocationDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.MagneticFiledDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.OrientationSensorDataCollector;
-import sv.cmu.edu.ips.service.dataCollectors.SoundDataCollector;
+import sv.cmu.edu.ips.service.dataCollectors.SensorDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.WiFiSensorDataCollector;
 
 /**
@@ -36,8 +37,8 @@ public class DalaCollectorsList {
         // Add 3 sample items.
         addItem(new WiFiSensorDataCollector("1", "WiFi"));
         addItem(new BluetoothDataCollector("2", "Bluetooth"));
-        addItem(new SensorDataCollector("3", "Infrared"));
-        addItem(new SoundDataCollector("4", "Sound"));
+        addItem(new IRDataCollector("3", "Infrared"));
+        addItem(new AudioDataCollector("4", "Sound"));
         addItem(new MagneticFiledDataCollector("5", "Magnetic Field"));
         addItem(new OrientationSensorDataCollector("6", "Orientation"));
         addItem(new LightDataCollector("7", "Light"));

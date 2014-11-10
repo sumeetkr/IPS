@@ -3,6 +3,7 @@ package sv.cmu.edu.ips.views;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -21,6 +22,7 @@ import edu.mit.media.funf.pipeline.BasicPipeline;
 import sv.cmu.edu.ips.R;
 import sv.cmu.edu.ips.service.dataCollectors.SensorDataCollector;
 import sv.cmu.edu.ips.util.IPSFileWriter;
+import sv.cmu.edu.ips.util.LogUtil;
 import sv.cmu.edu.ips.util.UserInputManager;
 
 /**
@@ -125,6 +127,13 @@ public class DataCollectListActivity extends FragmentActivity
         bindService(new Intent(this, FunfManager.class), funfManagerConn, BIND_AUTO_CREATE);
     }
 
+    @Override
+    public void onResume(){
+        super.onResume();
+        AudioManager am = (AudioManager)getSystemService(AUDIO_SERVICE);
+        LogUtil.log("am.isWiredHeadsetOn()"+ am.isWiredHeadsetOn() + "");
+    }
+
     private Runnable runnable = new Runnable() {
         int currentCount = 0;
         int totalCount = 100;
@@ -192,6 +201,7 @@ public class DataCollectListActivity extends FragmentActivity
     @Override
     protected void onDestroy(){
         if(pipeline != null) pipeline.onDestroy();
+        if(funfManagerConn != null) unbindService(funfManagerConn);
         funfManager = null;
         funfManagerConn = null;
         super.onDestroy();

@@ -6,7 +6,6 @@ package sv.cmu.edu.ips.service;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
-import android.media.MediaRecorder;
 import android.util.Log;
 
 import java.util.LinkedList;
@@ -127,7 +126,7 @@ public class MicrophoneRecorder extends Thread {
 
     }
 
-    public void startRecord(){
+    public void startRecord(int audioRecordType){
         try{
             this.isRecording = false;
             if(this.recorder != null){
@@ -135,7 +134,7 @@ public class MicrophoneRecorder extends Thread {
                     return;
                 }
             }else{
-                if(initRecorder() == null)
+                if(initRecorder(audioRecordType) == null)
                     return;
             }
             recorder.startRecording();
@@ -162,7 +161,7 @@ public class MicrophoneRecorder extends Thread {
     }
 
 
-    private AudioRecord initRecorder(){
+    private AudioRecord initRecorder(int audioRecordType){
         try{
             bufferSizeInBytes = AudioRecord.getMinBufferSize(
                     SAMPLING_FREQUENCY,
@@ -170,7 +169,7 @@ public class MicrophoneRecorder extends Thread {
                     AudioFormat.ENCODING_PCM_16BIT);
 
             this.recorder = new AudioRecord(
-                    MediaRecorder.AudioSource.DEFAULT,
+                    audioRecordType,
                     SAMPLING_FREQUENCY,
                     AudioFormat.CHANNEL_IN_MONO,
                     AudioFormat.ENCODING_PCM_16BIT,

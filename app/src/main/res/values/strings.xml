@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">CMU Indoor Positioning System</string>
+    <string name="app_name">CMU IPS</string>
     <string name="title_section1">Location</string>
     <string name="title_section2">Beacons</string>
     <string name="title_section3">Settings</string>
