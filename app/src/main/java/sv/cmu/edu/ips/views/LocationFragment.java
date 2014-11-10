@@ -1,4 +1,4 @@
-package sv.cmu.edu.ips;
+package sv.cmu.edu.ips.views;
 
 import android.app.Fragment;
 import android.content.BroadcastReceiver;
@@ -17,6 +17,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
 
+import sv.cmu.edu.ips.R;
 import sv.cmu.edu.ips.util.Constants;
 import sv.cmu.edu.ips.util.IPSHttpClient;
 
@@ -101,6 +102,12 @@ public class LocationFragment extends Fragment {
 //        updateLocation(beaconId);
     }
 
+    private void updateSignalStrength(long signalStrength){
+
+        TextView view = (TextView) this.getView().findViewById(R.id.txtSignalStrengthIPS);
+        view.setText(SIGNAL_STRENGTH_CMU_IPS + signalStrength);
+    }
+
     private void updateLocation(final String location){
 
         if(location != null && !location.isEmpty() ){
@@ -179,6 +186,8 @@ public class LocationFragment extends Fragment {
             // Extract data included in the Intent
             Log.d("IPS", "new location for location fragment");
             final String json = intent.getStringExtra("message");
+            final long strength = intent.getLongExtra("amplitude", 100);
+            updateSignalStrength(strength);
             updateLocation(json);
         }
     };

@@ -16,5 +16,40 @@
     <string name="title_activity_location">CMU Indoor Map</string>
     <string name="title_activity_web_view">WebViewActivity</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_data_collection">CMU IPS Data Collection</string>
+    <string name="title_datacollect_list">CMU IPS Data Collection</string>
+    <string name="title_datacollect_detail">CMU IPS Data Collection</string>
+    <string name="chkText">dummy checkbox text</string>
+    <string name="default_pipeline">
+        {"@type":"edu.mit.media.funf.pipeline.BasicPipeline",
+         "name":"default",
+         "version":1,
+        "data": [
+                        {"@type": "edu.mit.media.funf.probe.builtin.WifiProbe",
+                         "@schedule": {"interval": 600, "duration": 120}
+                        },
+                        {"@type": "edu.mit.media.funf.probe.builtin.SimpleLocationProbe",
+                         "@schedule": {"interval": 600, "duration": 2},
+                         "goodEnoughAccuracy": 80,
+                         "maxWaitTime": 60
+                        },
+                        {"@type": "edu.mit.media.funf.probe.builtin.LightSensorProbe",
+                         "@schedule": {"interval": 600, "duration": 10}
+                        },
+                        {"@type": "edu.mit.media.funf.probe.builtin.AudioCaptureProbe",
+                         "@schedule": {"interval": 600, "duration": 10}
+                        },
+                        {"@type": "edu.mit.media.funf.probe.builtin.MagneticFieldSensorProbe",
+                         "@schedule": {"interval": 600}
+                        },
+                        {"@type": "edu.mit.media.funf.probe.builtin.OrientationSensorProbe",
+                         "@schedule": {"interval": 600}
+                        },
+                        {"@type": "edu.mit.media.funf.probe.builtin.BluetoothProbe",
+                         "@schedule": {"interval": 600, "duration": 60}
+                        }
+                ]
+        }
+    </string>
 
 </resources>

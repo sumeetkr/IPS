@@ -278,6 +278,15 @@ public class SignalAnalyzer {
         String beaconId = "";
         double amplitude = 100.00;
 
+        int count = 0;
+        long dataSum = 0;
+        for(short point:data){
+            count = count +1;
+            dataSum = dataSum + Math.abs(point);
+        }
+
+        if(count >0) amplitude = dataSum/count;
+
         short[] signalData = new short[0];
         try {
             short[] dataCopy = data.clone();

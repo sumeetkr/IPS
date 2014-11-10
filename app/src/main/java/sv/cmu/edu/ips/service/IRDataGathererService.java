@@ -1,4 +1,4 @@
-package sv.cmu.edu.ips;
+package sv.cmu.edu.ips.service;
 
 import android.app.NotificationManager;
 import android.app.Service;
@@ -14,6 +14,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import sv.cmu.edu.ips.R;
 import sv.cmu.edu.ips.data.AudioData;
 import sv.cmu.edu.ips.data.SignalData;
 import sv.cmu.edu.ips.util.IPSFileWriter;
@@ -43,7 +44,7 @@ public class IRDataGathererService extends Service {
     }
 
     public class LocalBinder extends Binder {
-        IRDataGathererService getService() {
+        public IRDataGathererService getService() {
             return IRDataGathererService.this;
         }
     }
@@ -141,6 +142,7 @@ public class IRDataGathererService extends Service {
             protected void onRecordEnded(){
                 super.onRecordEnded();
 
+                Log.d(logLabel, "Recording ended");
                 if(isDataToBeWrittenToFile) {
                     IPSFileWriter fileWriter = new IPSFileWriter(String.valueOf(System.currentTimeMillis())+".pcm");
                     fileWriter.appendText(Arrays.toString(super.getAggregatedData()));
@@ -150,7 +152,7 @@ public class IRDataGathererService extends Service {
                 try {
                     SignalData sigData = SignalAnalyzer.getSignalInfoStringFromRawSignal(super.getAggregatedData());
                     String beaconId = sigData.getBeaconId();
-                    Log.d(logLabel, "Got beacon ID "+ beaconId);
+                    Log.d(logLabel, "Got beacon ID "+ beaconId + " Ampl = " + sigData.getAmplitude());
                     if(!beaconId.isEmpty() && beaconId.length()>5){
                         Intent intent = new Intent("my-event");
                         // add data
@@ -170,10 +172,11 @@ public class IRDataGathererService extends Service {
                     fileWriter.close();
                 }
 
-                if(noOfInvalidBeaconFound>10){
-                    stopRecording();
-                    Log.d(logLabel, "forced stopping collection because many invalid beacons found :"+ noOfInvalidBeaconFound);
-                }
+//                if(noOfInvalidBeaconFound>10){
+//                    stopRecording();
+//                    Log.d(logLabel,
+//                            "forced stopping collection because many invalid beacons found :"+ noOfInvalidBeaconFound);
+//                }
             }
 
         };

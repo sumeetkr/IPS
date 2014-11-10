@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="username" type="id">dummyname</item>
+    <item name="email" type="id">dummyemail</item>
+    <item name="name" type="id">name</item>
+</resources>

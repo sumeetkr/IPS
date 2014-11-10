@@ -1,4 +1,4 @@
-package sv.cmu.edu.ips;
+package sv.cmu.edu.ips.views;
 
 import android.app.Fragment;
 import android.content.BroadcastReceiver;
@@ -25,9 +25,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import sv.cmu.edu.ips.R;
 import sv.cmu.edu.ips.data.BeaconData;
 import sv.cmu.edu.ips.util.Constants;
 import sv.cmu.edu.ips.util.IPSHttpClient;
+import sv.cmu.edu.ips.views.MainActivity;
 
 public class BeaconsFragment extends Fragment {
 

@@ -1,4 +1,4 @@
-package sv.cmu.edu.ips;
+package sv.cmu.edu.ips.views;
 
 import android.app.ActionBar;
 import android.app.Fragment;
@@ -26,7 +26,9 @@ import android.widget.Toast;
 
 import java.util.Locale;
 
+import sv.cmu.edu.ips.R;
 import sv.cmu.edu.ips.data.ScannerData;
+import sv.cmu.edu.ips.service.IRDataGathererService;
 import sv.cmu.edu.ips.util.Constants;
 import sv.cmu.edu.ips.util.IPSHttpClient;
 import sv.cmu.edu.ips.util.LogUtil;
@@ -140,8 +142,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                     return LocationFragment.newInstance("name1", "name2");
                 case 1:
                     return new BeaconsFragment();
-                case 2:
-                    return new PlaceholderFragment();
             }
             return null;
         }

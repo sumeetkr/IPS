@@ -23,12 +23,26 @@ public class IPSFileWriter {
                 root.mkdirs();
             }
 
+            File temp = createTempFolder();
+
             long epoch = System.currentTimeMillis()/1000;
-            File gpxfile = new File(root, sFileName);
+            File gpxfile = new File(temp, sFileName);
             writer = new FileWriter(gpxfile);
         } catch (IOException e) {
             Log.d(TAG, e.toString());
         }
+    }
+
+    public static File createTempFolder() {
+        File temp = new File(Environment.getExternalStorageDirectory(), "IPS/temp");
+        if (!temp.exists())
+        {
+            temp.mkdir();
+        }else{
+            temp.delete();
+            temp.mkdir();
+        }
+        return temp;
     }
 
     public  void appendText( String sBody)
@@ -68,6 +82,15 @@ public class IPSFileWriter {
         if(writer != null){
             writer.close();
             writer = null;
+        }
+    }
+
+    public static void renameTempFolder(String labelString) {
+        File renamed = new File(Environment.getExternalStorageDirectory(), "IPS/" + labelString);
+        File temp = new File(Environment.getExternalStorageDirectory(), "IPS/temp");
+        if (temp.exists())
+        {
+            temp.renameTo(renamed);
         }
     }
 }
