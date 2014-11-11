@@ -8,7 +8,6 @@ import java.util.Map;
 import sv.cmu.edu.ips.service.dataCollectors.AudioDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.BluetoothDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.IRDataCollector;
-import sv.cmu.edu.ips.service.dataCollectors.LightDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.LocationDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.MagneticFiledDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.OrientationSensorDataCollector;
@@ -21,7 +20,7 @@ import sv.cmu.edu.ips.service.dataCollectors.WiFiSensorDataCollector;
  * <p/>
  * TODO: Replace all uses of this class before publishing your app.
  */
-public class DalaCollectorsList {
+public class DataCollectorsList {
 
     /**
      * An array of sample (dummy) items.
@@ -35,14 +34,14 @@ public class DalaCollectorsList {
 
     static {
         // Add 3 sample items.
-        addItem(new WiFiSensorDataCollector("1", "WiFi"));
-        addItem(new BluetoothDataCollector("2", "Bluetooth"));
-        addItem(new IRDataCollector("3", "Infrared"));
-        addItem(new AudioDataCollector("4", "Sound"));
+        addItem(new IRDataCollector("1", "Infrared"));
+        addItem(new WiFiSensorDataCollector("2", "WiFi"));
+        addItem(new BluetoothDataCollector("3", "Bluetooth"));
         addItem(new MagneticFiledDataCollector("5", "Magnetic Field"));
         addItem(new OrientationSensorDataCollector("6", "Orientation"));
-        addItem(new LightDataCollector("7", "Light"));
+        //addItem(new LightDataCollector("7", "Light"));
         addItem(new LocationDataCollector("8", "GPS Location"));
+        addItem(new AudioDataCollector("4", "Sound"));
     }
 
     private static void addItem(SensorDataCollector item) {

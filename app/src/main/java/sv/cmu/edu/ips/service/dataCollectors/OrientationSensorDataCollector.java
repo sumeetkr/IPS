@@ -24,6 +24,7 @@ public class OrientationSensorDataCollector extends SensorDataCollector implemen
     public OrientationSensorDataCollector(String id, String name) {
         super(id, name);
         data = new ArrayList<IJsonObject>();
+        setNoOfDataPointsToCollect(5);
     }
 
     @Override
@@ -34,7 +35,7 @@ public class OrientationSensorDataCollector extends SensorDataCollector implemen
     @Override
     public void onDataReceived(IJsonObject iJsonObject, IJsonObject iJsonObject2) {
 
-        LogUtil.log(this.getClass().getName()+ "Data received");
+        LogUtil.log(getName()+ "Data received");
         data.add(iJsonObject2);
         LogUtil.debug(iJsonObject2.toString());
 
@@ -49,14 +50,14 @@ public class OrientationSensorDataCollector extends SensorDataCollector implemen
         orientationSensorProbe.registerPassiveListener(this);
 
         writeDataToFile("OrientationData.json", data);
-        LogUtil.log(this.getClass().getName() + "Data collection completed");
+        LogUtil.log(getName() + "Data collection completed");
     }
 
     private void registerProbe(Gson gson) {
         orientationSensorProbe = gson.fromJson(new JsonObject(), OrientationSensorProbe.class);
         orientationSensorProbe.registerListener(this);
 
-        LogUtil.log(this.getClass().getName() + "Probe registered");
+        LogUtil.log(getName() + "Probe registered");
     }
 
 }

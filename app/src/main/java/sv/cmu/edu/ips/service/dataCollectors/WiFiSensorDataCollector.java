@@ -34,7 +34,7 @@ public class WiFiSensorDataCollector extends SensorDataCollector implements Prob
     @Override
     public void onDataReceived(IJsonObject iJsonObject, IJsonObject iJsonObject2) {
 
-        LogUtil.log(this.getClass().getName()+ "Data received");
+        LogUtil.log(getName()+ "Data received");
         data.add(iJsonObject2);
         LogUtil.debug(iJsonObject2.toString());
     }
@@ -44,14 +44,14 @@ public class WiFiSensorDataCollector extends SensorDataCollector implements Prob
         wifiProbe.registerPassiveListener(this);
 
         writeDataToFile("WiFiData.json", data);
-        LogUtil.log(this.getClass().getName() + "Data collection completed");
+        LogUtil.log(getName() + "Data collection completed");
     }
 
     private void registerProbe(Gson gson) {
         wifiProbe = gson.fromJson(new JsonObject(), WifiProbe.class);
         wifiProbe.registerListener(this);
 
-        LogUtil.log(this.getClass().getName() + "Probe registered");
+        LogUtil.log(getName() + "Probe registered");
     }
 
 }

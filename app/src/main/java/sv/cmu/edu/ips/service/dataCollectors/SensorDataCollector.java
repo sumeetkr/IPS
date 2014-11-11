@@ -1,10 +1,14 @@
 package sv.cmu.edu.ips.service.dataCollectors;
 
+import android.content.Context;
+import android.content.Intent;
+
 import com.google.gson.Gson;
 
 import java.util.List;
 
 import edu.mit.media.funf.json.IJsonObject;
+import sv.cmu.edu.ips.util.Constants;
 import sv.cmu.edu.ips.util.IPSFileWriter;
 
 /**
@@ -16,6 +20,7 @@ public class SensorDataCollector {
     private String name;
     private String description;
     private int noOfDataPointsToCollect = 10;
+    Context context;
 
     public SensorDataCollector(String id, String name){
         this.id = id;
@@ -51,6 +56,11 @@ public class SensorDataCollector {
 
     }
 
+    public void collectData(Context context, Gson gson){
+        this.context = context;
+        collectData(gson);
+    }
+
     public int getNoOfDataPointsToCollect() {
         return noOfDataPointsToCollect;
     }
@@ -74,5 +84,15 @@ public class SensorDataCollector {
 
         fileWriter.appendText("]");
         fileWriter.close();
+
+        onDataCollectionFinished();
+    }
+
+    protected void onDataCollectionFinished(){
+        Intent intent = new Intent(Constants.DATA_COLLECTION_FINISHED);
+        intent.putExtra(Constants.SENSOR_TYPE, getName());
+
+
+        if(context != null) context.sendBroadcast(intent);
     }
 }

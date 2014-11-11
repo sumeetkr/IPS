@@ -24,7 +24,7 @@ public class LightDataCollector extends SensorDataCollector implements Probe.Dat
 
     public LightDataCollector(String id, String name) {
         super(id, name);
-        super.setNoOfDataPointsToCollect(3);
+        super.setNoOfDataPointsToCollect(1);
         data = new ArrayList<IJsonObject>();
     }
 

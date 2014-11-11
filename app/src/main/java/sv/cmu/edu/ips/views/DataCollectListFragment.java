@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sv.cmu.edu.ips.R;
-import sv.cmu.edu.ips.util.DalaCollectorsList;
+import sv.cmu.edu.ips.util.DataCollectorsList;
 import sv.cmu.edu.ips.service.dataCollectors.SensorDataCollector;
 import sv.cmu.edu.ips.util.SensorProbeListAdapter;
 
@@ -79,7 +79,7 @@ public class DataCollectListFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        sensorDataCollectors = DalaCollectorsList.ITEMS;
+        sensorDataCollectors = DataCollectorsList.ITEMS;
 
         setListAdapter(new ArrayAdapter<SensorDataCollector>(
                 getActivity(),
@@ -90,7 +90,7 @@ public class DataCollectListFragment extends ListFragment {
         setListAdapter(new SensorProbeListAdapter(
                 getActivity(),
                 R.id.username,
-                (ArrayList<SensorDataCollector>) DalaCollectorsList.ITEMS));
+                (ArrayList<SensorDataCollector>) DataCollectorsList.ITEMS));
 
     }
 
@@ -131,7 +131,7 @@ public class DataCollectListFragment extends ListFragment {
 
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
-        mCallbacks.onItemSelected(DalaCollectorsList.ITEMS.get(position).getId());
+        mCallbacks.onItemSelected(DataCollectorsList.ITEMS.get(position).getId());
     }
 
     @Override

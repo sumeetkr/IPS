@@ -24,7 +24,7 @@ public class LocationDataCollector extends SensorDataCollector implements Probe.
     public LocationDataCollector(String id, String name) {
         super(id, name);
         data = new ArrayList<IJsonObject>();
-        setNoOfDataPointsToCollect(10);
+        setNoOfDataPointsToCollect(5);
     }
 
     @Override

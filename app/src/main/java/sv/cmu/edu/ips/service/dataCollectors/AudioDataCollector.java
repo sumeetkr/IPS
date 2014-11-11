@@ -1,5 +1,6 @@
 package sv.cmu.edu.ips.service.dataCollectors;
 
+import android.content.Context;
 import android.media.MediaRecorder;
 
 import com.google.gson.Gson;
@@ -23,11 +24,13 @@ public class AudioDataCollector extends SensorDataCollector{
     private ArrayList<AudioData> aggregatedData;
     public AudioDataCollector(String id, String name) {
         super(id, name);
-        setNoOfDataPointsToCollect(20);
+        setNoOfDataPointsToCollect(100);
     }
 
     @Override
-    public void collectData(Gson gson){
+    public void collectData(Context context, Gson gson){
+        super.collectData(context,gson);
+
         aggregatedData = new ArrayList<AudioData>();
         dataRecorder = new IRDataRecorder() {
 
@@ -39,18 +42,17 @@ public class AudioDataCollector extends SensorDataCollector{
                 AudioData audioData = new AudioData(timestamp, data);
                 aggregatedData.add(audioData);
 
-                LogUtil.debug(audioData.toString());
-                if(aggregatedData.size()>getNoOfDataPointsToCollect()){
+                LogUtil.debug("Audio Data " + audioData.toString());
+                if(length > getNoOfDataPointsToCollect()){
                     dataRecorder.stopRecord();
                 }
-
             }
 
             @Override
             protected void onRecordEnded() {
                 super.onRecordEnded();
                 writeDataToFile("AudioData.json", null);
-                LogUtil.log(this.getClass().getName() + "Data collection completed");
+                LogUtil.log(getName() + "Data collection completed");
             }
 
         };
@@ -62,5 +64,7 @@ public class AudioDataCollector extends SensorDataCollector{
         IPSFileWriter fileWriter = new IPSFileWriter(dataFileName);
         fileWriter.appendText(Arrays.toString(dataRecorder.getAggregatedData()));
         fileWriter.close();
+
+        super.onDataCollectionFinished();
     }
 }

@@ -29,15 +29,11 @@
                          "@schedule": {"interval": 600, "duration": 120}
                         },
                         {"@type": "edu.mit.media.funf.probe.builtin.SimpleLocationProbe",
-                         "@schedule": {"interval": 600, "duration": 2},
-                         "goodEnoughAccuracy": 80,
+                         "@schedule": {"interval": 600, "duration": 200},
                          "maxWaitTime": 60
                         },
                         {"@type": "edu.mit.media.funf.probe.builtin.LightSensorProbe",
-                         "@schedule": {"interval": 600, "duration": 10}
-                        },
-                        {"@type": "edu.mit.media.funf.probe.builtin.AudioCaptureProbe",
-                         "@schedule": {"interval": 600, "duration": 10}
+                         "@schedule": {"interval": 600}
                         },
                         {"@type": "edu.mit.media.funf.probe.builtin.MagneticFieldSensorProbe",
                          "@schedule": {"interval": 600}

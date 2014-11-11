@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import sv.cmu.edu.ips.R;
 
-import sv.cmu.edu.ips.util.DalaCollectorsList;
+import sv.cmu.edu.ips.util.DataCollectorsList;
 import sv.cmu.edu.ips.service.dataCollectors.SensorDataCollector;
 
 /**
@@ -45,7 +45,7 @@ public class DataCollectDetailFragment extends Fragment {
             // Load the dummy content specified by the fragment
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
-            mItem = DalaCollectorsList.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+            mItem = DataCollectorsList.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
         }
     }
 
