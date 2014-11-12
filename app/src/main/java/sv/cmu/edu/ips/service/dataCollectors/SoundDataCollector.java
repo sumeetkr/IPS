@@ -1,57 +1,79 @@
 package sv.cmu.edu.ips.service.dataCollectors;
 
+import android.content.Context;
+import android.media.MediaRecorder;
+
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import edu.mit.media.funf.json.IJsonObject;
-import edu.mit.media.funf.probe.Probe;
-import edu.mit.media.funf.probe.builtin.AudioCaptureProbe;
+import sv.cmu.edu.ips.util.ExtAudioRecorder;
+import sv.cmu.edu.ips.util.IPSFileWriter;
 import sv.cmu.edu.ips.util.LogUtil;
 
 /**
- * Created by sumeet on 11/9/14.
+ * Created by sumeet on 11/10/14.
  */
-public class SoundDataCollector extends SensorDataCollector implements Probe.DataListener{
+public class SoundDataCollector extends SensorDataCollector implements ExtAudioRecorder.AudioDataArrivedEventListener {
 
-    private boolean isActive = false;
-    private AudioCaptureProbe audioCaptureProbe;
-    private List<IJsonObject> data;
+    private ExtAudioRecorder dataRecorder;
+    private List<ExtAudioRecorder.AudioReadResult> dataList;
 
     public SoundDataCollector(String id, String name) {
         super(id, name);
-        data = new ArrayList<IJsonObject>();
+        setNoOfDataPointsToCollect(20);
     }
 
     @Override
-    public void collectData(Gson gson){
-        registerProbe(gson);
+    public void collectData(Context context, Gson gson){
+        super.collectData(context, gson);
+        dataRecorder = ExtAudioRecorder.getInstanse(false, MediaRecorder.AudioSource.CAMCORDER );
+        dataList = new ArrayList<ExtAudioRecorder.AudioReadResult>();
+
+        dataRecorder.registerDataListener(this);
+        dataRecorder.prepare();
+        dataRecorder.start();
+
     }
 
     @Override
-    public void onDataReceived(IJsonObject iJsonObject, IJsonObject iJsonObject2) {
+    public void onNewDataArrived(ExtAudioRecorder.AudioReadResult data) {
+        dataList.add(data);
 
-        LogUtil.log("SoundDataCollector Data received");
-        data.add(iJsonObject2);
-        LogUtil.debug(iJsonObject2.toString());
+        LogUtil.debug("Sound data collection" + Arrays.toString(data.buffer));
+
+        if(dataList.size() > getNoOfDataPointsToCollect()){
+            onDataCollectionFinished();
+        }
     }
 
     @Override
-    public void onDataCompleted(IJsonObject iJsonObject, JsonElement jsonElement) {
-        audioCaptureProbe.registerPassiveListener(this);
+    public  void onDataCollectionFinished(){
+        dataRecorder.stop();
+        dataRecorder.release();
 
-        String dataFileName = "SoundData.json";
-        writeDataToFile(dataFileName, data);
-        LogUtil.log("SoundDataCollector collection completed");
+        writeDataToFile("SoundData.json", null);
+        super.onDataCollectionFinished();
     }
 
-    private void registerProbe(Gson gson) {
-        audioCaptureProbe = gson.fromJson(new JsonObject(), AudioCaptureProbe.class);
-        audioCaptureProbe.registerListener(this);
+    protected void writeDataToFile(String dataFileName, List<IJsonObject> data) {
+        if(dataRecorder != null){
+            IPSFileWriter fileWriter = new IPSFileWriter(dataFileName);
+            List<Short> shorts = new ArrayList<Short>();
 
-        LogUtil.log("SoundDataCollector Probe registered");
+            for(ExtAudioRecorder.AudioReadResult result: dataList){
+                for(short dataPoint : result.buffer){
+                    shorts.add(dataPoint);
+                }
+            }
+
+            fileWriter.appendText(shorts.toString());
+            fileWriter.close();
+
+            dataRecorder = null;
+        }
     }
 }

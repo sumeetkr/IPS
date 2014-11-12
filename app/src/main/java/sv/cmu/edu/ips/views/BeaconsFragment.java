@@ -13,11 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -29,7 +25,6 @@ import sv.cmu.edu.ips.R;
 import sv.cmu.edu.ips.data.BeaconData;
 import sv.cmu.edu.ips.util.Constants;
 import sv.cmu.edu.ips.util.IPSHttpClient;
-import sv.cmu.edu.ips.views.MainActivity;
 
 public class BeaconsFragment extends Fragment {
 
@@ -98,37 +93,37 @@ public class BeaconsFragment extends Fragment {
                 setUpMap();
         }
 
-        Button btnSave = (Button)this.getView().findViewById(R.id.btnSave);
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveLabel();
-            }
-        });
+//        Button btnSave = (Button)this.getView().findViewById(R.id.btnSave);
+//        btnSave.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                saveLabel();
+//            }
+//        });
     }
 
     private void saveLabel(){
         Log.d("IPS", "Saving label info" );
-        EditText editText = (EditText) this.getView().findViewById(R.id.editText);
+//        EditText editText = (EditText) this.getView().findViewById(R.id.editText);
 //        editText.setFocusable(false);
-        label = editText.getText().toString();
+//        label = editText.getText().toString();
 
         //Send data to server
-        sendNewBeaconIdToServer(getActivity());
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getActivity(), "Saved location for beacon: " + beaconId, Toast.LENGTH_SHORT).show();
-            }
-        });
+//        sendNewBeaconIdToServer(getActivity());
+//        handler.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                Toast.makeText(getActivity(), "Saved location for beacon: " + beaconId, Toast.LENGTH_SHORT).show();
+//            }
+//        });
 
         //need to update the location view
 //        JsonSender.getDataFromServer(getActivity(), Constants.URL_TO_GET_LOCATION);
 
         //Raise event for location to update its label
-        Intent intent = new Intent("new-location-event");
-        intent.putExtra("message", label);
-        LocalBroadcastManager.getInstance(this.getActivity()).sendBroadcast(intent);
+//        Intent intent = new Intent("new-location-event");
+//        intent.putExtra("message", label);
+//        LocalBroadcastManager.getInstance(this.getActivity()).sendBroadcast(intent);
     }
 
     private void sendNewBeaconIdToServer(Context context) {
@@ -176,9 +171,9 @@ public class BeaconsFragment extends Fragment {
     }
 
     private void updateTextView() {
-        Log.d("IPS", "Setting up beacon id :" + beaconId);
-        TextView beaconIdText = (TextView)this.getView().findViewById(R.id.beaconId);
-        beaconIdText.setText(BEACON_ID + beaconId);
+//        Log.d("IPS", "Setting up beacon id :" + beaconId);
+//        TextView beaconIdText = (TextView)this.getView().findViewById(R.id.beaconId);
+//        beaconIdText.setText(BEACON_ID + beaconId);
     }
 
     public interface OnFragmentInteractionListener {
@@ -198,7 +193,7 @@ public class BeaconsFragment extends Fragment {
 
     public void makeLabeltextFocussableForEdit(){
         Log.d("IPS", "Making label text focusable for edit :" );
-        EditText editText = (EditText) this.getView().findViewById(R.id.editText);
+//        EditText editText = (EditText) this.getView().findViewById(R.id.editText);
 //        editText.setFocusable(true);
 
     }

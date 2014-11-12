@@ -4,7 +4,6 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaRecorder;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -73,6 +72,7 @@ public class IRDataGathererService extends Service {
     public void onDestroy() {
         // Cancel the persistent notification.
         mNM.cancel(NOTIFICATION);
+        stopRecording();
 //        timer.cancel();
 //        Log.d("IRDataGathererService", "TimerTask stopped! :");
 
@@ -182,7 +182,7 @@ public class IRDataGathererService extends Service {
 
         };
 
-        dataRecorder.startRecord(MediaRecorder.AudioSource.DEFAULT);
+        dataRecorder.startRecord();
         isListening = true;
         Log.d(logLabel, "started recording");
     }

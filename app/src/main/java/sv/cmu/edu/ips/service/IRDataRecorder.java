@@ -10,7 +10,7 @@ import java.util.ArrayList;
 /**
  * Created by sumeet on 9/10/14.
  */
-public class IRDataRecorder extends MicrophoneRecorder {
+public class IRDataRecorder extends MicrophoneRecorder{
 
     private String logLabel = "IRDataRecorder";
     private ArrayList<AbstractMap.SimpleEntry<Long, short[]>> samples = new ArrayList<AbstractMap.SimpleEntry<Long, short[]>>(30);

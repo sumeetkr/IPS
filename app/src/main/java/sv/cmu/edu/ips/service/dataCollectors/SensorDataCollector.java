@@ -56,7 +56,7 @@ public class SensorDataCollector {
 
     }
 
-    public void collectData(Context context, Gson gson){
+    public  void collectData(Context context, Gson gson){
         this.context = context;
         collectData(gson);
     }

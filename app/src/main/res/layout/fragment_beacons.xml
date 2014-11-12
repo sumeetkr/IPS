@@ -5,6 +5,69 @@
     android:focusableInTouchMode="true"
     tools:context="sv.cmu.edu.ips.views.BeaconsFragment">
 
+    <!--<LinearLayout-->
+        <!--android:orientation="vertical"-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_alignParentStart="true"-->
+        <!--android:id="@+id/linearLayoutInfoBar">-->
+
+        <!--<RelativeLayout-->
+            <!--android:orientation="horizontal"-->
+            <!--android:layout_width="fill_parent"-->
+            <!--android:layout_height="wrap_content">-->
+
+
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginLeft="10dp"-->
+                <!--android:layout_marginTop="17dp"-->
+                <!--android:text="Last known Id: 1222331"-->
+                <!--android:id="@+id/beaconId"/>-->
+
+            <!--<Button-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="40dp"-->
+                <!--android:layout_alignParentRight="true"-->
+                <!--android:layout_marginTop="7dp"-->
+                <!--android:layout_marginLeft="10dp"-->
+                <!--android:layout_marginRight="20dp"-->
+                <!--android:text="Save"-->
+                <!--android:id="@+id/btnSave"/>-->
+
+        <!--</RelativeLayout>-->
+
+        <!--<RelativeLayout-->
+            <!--android:orientation="horizontal"-->
+            <!--android:layout_width="fill_parent"-->
+            <!--android:layout_height="wrap_content">-->
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginTop="15dp"-->
+                <!--android:layout_marginLeft="10dp"-->
+                <!--android:layout_marginBottom="4dp"-->
+                <!--android:text="Label:"-->
+                <!--android:id="@+id/txtLabel"/>-->
+
+            <!--<EditText-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="45dp"-->
+                <!--android:layout_marginLeft="20dp"-->
+                <!--android:layout_marginRight="80dp"-->
+                <!--android:id="@+id/editText"-->
+                <!--android:layout_alignParentRight="true"-->
+                <!--android:layout_alignParentEnd="true"-->
+                <!--android:layout_toRightOf="@+id/txtLabel"-->
+                <!--android:hint="e.g. Rm 1035 Bldg 19"-->
+                <!--android:inputType="text"-->
+                <!--android:focusable="true"-->
+                <!--android:editable="true" />-->
+        <!--</RelativeLayout>-->
+    <!--</LinearLayout>-->
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="fill_parent"
@@ -12,30 +75,18 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:id="@+id/linearLayoutInfoBar">
-
         <RelativeLayout
             android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
-
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="17dp"
-                android:text="Last known Id: 1222331"
-                android:id="@+id/beaconId"/>
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_alignParentRight="true"
-                android:layout_marginTop="7dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="20dp"
-                android:text="Save"
-                android:id="@+id/btnSave"/>
+                android:text="Your location: NA"
+                android:id="@+id/txtLocation"/>
 
         </RelativeLayout>
 
@@ -46,25 +97,22 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="7dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginBottom="4dp"
-                android:text="Label:"
-                android:id="@+id/txtLabel"/>
+                android:text="Signal Strength     CMU IPS  90%"
+                android:id="@+id/txtSignalStrengthIPS"/>
 
-            <EditText
+            <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="45dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="7dp"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="80dp"
-                android:id="@+id/editText"
+                android:id="@+id/txtSignalStrengthGPS"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
-                android:layout_toRightOf="@+id/txtLabel"
-                android:hint="e.g. Rm 1035 Bldg 19"
-                android:inputType="text"
-                android:focusable="true"
-                android:editable="true" />
+                android:text="GPS : 20%"/>
         </RelativeLayout>
     </LinearLayout>
 

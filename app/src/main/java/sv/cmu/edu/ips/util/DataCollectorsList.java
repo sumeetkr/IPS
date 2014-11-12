@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import sv.cmu.edu.ips.service.dataCollectors.AudioDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.BluetoothDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.IRDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.LocationDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.MagneticFiledDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.OrientationSensorDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.SensorDataCollector;
+import sv.cmu.edu.ips.service.dataCollectors.SoundDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.WiFiSensorDataCollector;
 
 /**
@@ -35,13 +35,14 @@ public class DataCollectorsList {
     static {
         // Add 3 sample items.
         addItem(new IRDataCollector("1", "Infrared"));
-        addItem(new WiFiSensorDataCollector("2", "WiFi"));
-        addItem(new BluetoothDataCollector("3", "Bluetooth"));
+        addItem(new SoundDataCollector("2", "Sound"));
+        addItem(new WiFiSensorDataCollector("3", "WiFi"));
+        addItem(new BluetoothDataCollector("4", "Bluetooth"));
         addItem(new MagneticFiledDataCollector("5", "Magnetic Field"));
         addItem(new OrientationSensorDataCollector("6", "Orientation"));
         //addItem(new LightDataCollector("7", "Light"));
         addItem(new LocationDataCollector("8", "GPS Location"));
-        addItem(new AudioDataCollector("4", "Sound"));
+
     }
 
     private static void addItem(SensorDataCollector item) {

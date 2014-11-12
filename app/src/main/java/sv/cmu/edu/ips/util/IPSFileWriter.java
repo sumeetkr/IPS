@@ -45,6 +45,17 @@ public class IPSFileWriter {
         return temp;
     }
 
+    public static String getTempFilePath(){
+        String path = "";
+        File temp = new File(Environment.getExternalStorageDirectory(), "IPS/temp");
+        if (!temp.exists())
+        {
+            temp.mkdir();
+        }
+
+        return temp.getAbsolutePath();
+    }
+
     public  void appendText( String sBody)
     {
         try

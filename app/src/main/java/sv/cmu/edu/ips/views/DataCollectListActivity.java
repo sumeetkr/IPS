@@ -99,8 +99,10 @@ public class DataCollectListActivity extends FragmentActivity
 
                 if(btn.getText() == Constants.START_BUTTON_TEXT){
                     btn.setText(Constants.COLLECTING_BUTTON_TEXT);
+                    listOfProbesWhichFinishedDataCollection = new HashSet<String>();
+
                     mProgress.incrementProgressBy(10);
-                    handler.postDelayed(runnable, 100);
+                    handler.postDelayed(runnableUpdateProgress, 100);
                     final List<SensorDataCollector> probes = listFragment.getActiveSensorProbes();
                     //IR data and sound data has to be done on after other as they use same hardware
                     //Doing IR first, then will do sound in the collection
@@ -122,7 +124,13 @@ public class DataCollectListActivity extends FragmentActivity
             }
         });
 
-        listOfProbesWhichFinishedDataCollection = new HashSet<String>();
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        checkIfAudioJackIsIn();
+
         IntentFilter intentFilter = new IntentFilter(Constants.DATA_COLLECTION_FINISHED);
         registerReceiver(dataCollectionFinishedBroadcastReceiver, intentFilter );
 
@@ -131,33 +139,22 @@ public class DataCollectListActivity extends FragmentActivity
     }
 
     @Override
-    public void onResume(){
-        super.onResume();
-        AudioManager am = (AudioManager)getSystemService(AUDIO_SERVICE);
-        LogUtil.log("am.isWiredHeadsetOn()" + am.isWiredHeadsetOn() + "");
-        if(!am.isWiredHeadsetOn()){
-            Toast.makeText(this, "IR receiver not found in headset, please reinsert. ", Toast.LENGTH_SHORT);
-        }
+    public void onPause(){
+        destroyFunf();
+        unregisterReceiver(dataCollectionFinishedBroadcastReceiver);
+        super.onPause();
+    }
+    @Override
+    protected void onDestroy(){
+        destroyFunf();
+        super.onDestroy();
     }
 
-    private Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            progressStatus = (1 + listOfProbesWhichFinishedDataCollection.size() *100)/(1 +listFragment.getActiveSensorProbes().size());
-            mProgress.setProgress(progressStatus);
-            if (listOfProbesWhichFinishedDataCollection.size() < listFragment.getActiveSensorProbes().size() -1){
-                handler.postDelayed(this, 500);
-            }else if(listOfProbesWhichFinishedDataCollection.size() == (listFragment.getActiveSensorProbes().size() -1)){
-                listFragment.getActiveSensorProbes().get(0).collectData(getApplicationContext(), funfManager.getGson());
-                handler.postDelayed(this, 500);
-            }
-            else{
-                startButton.setText(Constants.LABEL_BUTTON_TEXT);
-                labelData();
-            }
-            Thread.yield();
-        }
-    };
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
+        destroyFunf();
+    }
 
     /**
      * Callback method from {@link DataCollectListFragment.Callbacks}
@@ -186,26 +183,36 @@ public class DataCollectListActivity extends FragmentActivity
         }
     }
 
-    @Override
-    protected void onDestroy(){
+    private void destroyFunf() {
         if(pipeline != null) pipeline.onDestroy();
         if(funfManagerConn != null) unbindService(funfManagerConn);
         funfManager = null;
         funfManagerConn = null;
-        super.onDestroy();
     }
 
     private void labelData(){
         UserInputManager uim = new UserInputManager();
         Handler.Callback callback = new Handler.Callback() {
             public boolean handleMessage(Message msg) {
-                applyLabel(String.valueOf(msg.obj));
+                if(msg == null){
+                    reset();
+                    startButton.setText(Constants.START_BUTTON_TEXT);
+                }else{
+                    applyLabel(String.valueOf(msg.obj));
+                }
                 return true;
             }
         };
+
         uim.getLabel(this, "Label the sound", callback);
+    }
+
+    private void reset(){
         if(mProgress != null) mProgress.setProgress(0);
-        if(listOfProbesWhichFinishedDataCollection != null) listOfProbesWhichFinishedDataCollection.clear();
+        if(listOfProbesWhichFinishedDataCollection != null) {
+            listOfProbesWhichFinishedDataCollection.clear();
+            listOfProbesWhichFinishedDataCollection = null;
+        }
     }
 
     private void applyLabel(String value) {
@@ -216,8 +223,40 @@ public class DataCollectListActivity extends FragmentActivity
             IPSFileWriter.renameTempFolder(labelString);
         }
 
+        reset();
         startButton.setText(Constants.START_BUTTON_TEXT);
     }
+
+    private boolean checkIfAudioJackIsIn() {
+        AudioManager am = (AudioManager)getSystemService(AUDIO_SERVICE);
+        LogUtil.log("am.isWiredHeadsetOn()" + am.isWiredHeadsetOn() + "");
+        if(!am.isWiredHeadsetOn()){
+            Toast.makeText(this, "IR receiver not found in headset, please reinsert. ", Toast.LENGTH_SHORT);
+        }
+
+        return am.isWiredHeadsetOn();
+    }
+
+    private Runnable runnableUpdateProgress = new Runnable() {
+        @Override
+        public void run() {
+            if(listOfProbesWhichFinishedDataCollection != null){
+                progressStatus = (1 + listOfProbesWhichFinishedDataCollection.size() *100)/(1 +listFragment.getActiveSensorProbes().size());
+                mProgress.setProgress(progressStatus);
+
+                if(listOfProbesWhichFinishedDataCollection.size() == (listFragment.getActiveSensorProbes().size() -1)){
+                    //now collect IR data
+                    // && checkIfAudioJackIsIn()
+                    listFragment.getActiveSensorProbes().get(0).collectData(getApplicationContext(), funfManager.getGson());
+                }
+                else if(listOfProbesWhichFinishedDataCollection.size() == (listFragment.getActiveSensorProbes().size())){
+                    startButton.setText(Constants.LABEL_BUTTON_TEXT);
+                    labelData();
+                }
+            }
+            Thread.yield();
+        }
+    };
 
     private ServiceConnection funfManagerConn = new ServiceConnection() {
         @Override
@@ -238,9 +277,12 @@ public class DataCollectListActivity extends FragmentActivity
         public void onReceive(Context context, Intent intent) {
             String collectorName = intent.getStringExtra(Constants.SENSOR_TYPE);
 
-            if(collectorName != null && collectorName != ""){
-                listOfProbesWhichFinishedDataCollection.add(collectorName);
-                LogUtil.log("Finished " + collectorName);
+            LogUtil.log("Received finish of " + collectorName);
+            if(collectorName != null && collectorName != "" && !listOfProbesWhichFinishedDataCollection.contains(collectorName)){
+                if(listOfProbesWhichFinishedDataCollection != null){
+                    listOfProbesWhichFinishedDataCollection.add(collectorName);
+                    handler.post(runnableUpdateProgress);
+                }
             }
         }
     };

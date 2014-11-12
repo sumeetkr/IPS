@@ -6,7 +6,7 @@
     <string name="title_section2">Beacons</string>
     <string name="title_section3">Settings</string>
     <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_collect_data">Collect data</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="local_service_started">IRDataGatherer Started</string>
     <string name="local_service_stopped">IRDataGathererStopped</string>

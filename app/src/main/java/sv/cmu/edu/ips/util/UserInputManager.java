@@ -34,7 +34,7 @@ public class UserInputManager {
 		alert.setNegativeButton("Cancel",
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						// Canceled.
+                        callback.handleMessage(null);
 					}
 				});
 

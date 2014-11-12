@@ -51,7 +51,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
         // Set up the action bar.
         final ActionBar actionBar = getActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+//        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+//        actionBar.hide();
 
         fragmentManager = getSupportFragmentManager();
 
@@ -69,7 +70,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
-                actionBar.setSelectedNavigationItem(position);
+//                actionBar.setSelectedNavigationItem(position);
             }
         });
 
@@ -81,7 +82,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 //            .setText(mSectionsPagerAdapter.getPageTitle(i))
         }
 
-        doBindService();
 
         TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
         deviceId = telephonyManager.getDeviceId();
@@ -103,7 +103,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_collect_data) {
+            Intent intent = new Intent(getApplicationContext(), DataCollectListActivity.class);
+            startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -138,9 +140,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         @Override
         public Fragment getItem(int position) {
             switch (position) {
-                case 0:
-                    return LocationFragment.newInstance("name1", "name2");
                 case 1:
+                    return LocationFragment.newInstance("name1", "name2");
+                case 0:
                     return new BeaconsFragment();
             }
             return null;
@@ -149,7 +151,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 1;
+            return 2;
         }
 
         @Override
@@ -196,21 +198,21 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     };
 
     void doBindService() {
-        bindService(new Intent(this,
-                IRDataGathererService.class),
-                mConnection,
-                Context.BIND_AUTO_CREATE);
-        mIsBound = true;
+//        bindService(new Intent(this,
+//                IRDataGathererService.class),
+//                mConnection,
+//                Context.BIND_AUTO_CREATE);
+//        mIsBound = true;
     }
 
     void doUnbindService() {
-        if (mIsBound) {
+//        if (mIsBound) {
 //            stopService(new Intent(this,
 //                    IRDataGathererService.class));
-            // Detach our existing connection.
-            unbindService(mConnection);
-            mIsBound = false;
-        }
+//            // Detach our existing connection.
+//            unbindService(mConnection);
+//            mIsBound = false;
+//        }
     }
 
     @Override
@@ -222,7 +224,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     @Override
     public void onResume() {
         super.onResume();
-
         doBindService();
         // Register mMessageReceiver to receive messages.
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
@@ -243,9 +244,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
     protected void onNewBeaconFound(String beaconId){
 //        SignalFragment signalFrag = (SignalFragment)getFragmentManager().findFragmentById(1);
-        BeaconsFragment signalFrag = (BeaconsFragment) mSectionsPagerAdapter.getItem(1);
+//        BeaconsFragment signalFrag = (BeaconsFragment) mSectionsPagerAdapter.getItem(2);
 //        if(signalFrag != null){
-            signalFrag.updateNewBeaconId(beaconId);
+//            signalFrag.updateNewBeaconId(beaconId);
 //        }
     }
 
