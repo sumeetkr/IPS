@@ -10,7 +10,7 @@ import java.util.List;
 import edu.mit.media.funf.json.IJsonObject;
 import edu.mit.media.funf.probe.Probe;
 import edu.mit.media.funf.probe.builtin.WifiProbe;
-import sv.cmu.edu.ips.util.LogUtil;
+import sv.cmu.edu.ips.util.Logger;
 
 /**
  * Created by sumeet on 11/9/14.
@@ -34,9 +34,9 @@ public class WiFiSensorDataCollector extends SensorDataCollector implements Prob
     @Override
     public void onDataReceived(IJsonObject iJsonObject, IJsonObject iJsonObject2) {
 
-        LogUtil.log(getName()+ "Data received");
+        Logger.log(getName() + "Data received");
         data.add(iJsonObject2);
-        LogUtil.debug(iJsonObject2.toString());
+        Logger.debug(iJsonObject2.toString());
     }
 
     @Override
@@ -44,14 +44,14 @@ public class WiFiSensorDataCollector extends SensorDataCollector implements Prob
         wifiProbe.registerPassiveListener(this);
 
         writeDataToFile("WiFiData.json", data);
-        LogUtil.log(getName() + "Data collection completed");
+        Logger.log(getName() + "Data collection completed");
     }
 
     private void registerProbe(Gson gson) {
         wifiProbe = gson.fromJson(new JsonObject(), WifiProbe.class);
         wifiProbe.registerListener(this);
 
-        LogUtil.log(getName() + "Probe registered");
+        Logger.log(getName() + "Probe registered");
     }
 
 }

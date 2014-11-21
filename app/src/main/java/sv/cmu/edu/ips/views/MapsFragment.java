@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,19 +15,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.IndoorBuilding;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import sv.cmu.edu.ips.R;
 import sv.cmu.edu.ips.data.BeaconData;
+import sv.cmu.edu.ips.service.IPSLocationProvider;
 import sv.cmu.edu.ips.util.Constants;
 import sv.cmu.edu.ips.util.IPSHttpClient;
 
-public class BeaconsFragment extends Fragment {
+public class MapsFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
     private final String BEACON_ID = "Beacon Id: ";
@@ -47,83 +52,76 @@ public class BeaconsFragment extends Fragment {
             return null;
         }
         view = (RelativeLayout) inflater.inflate(R.layout.fragment_beacons, container, false);
-        latitude = 37.410372;
-        longitude = -122.059683;
+//        latitude = 37.410372;
+//        longitude = -122.059683;
 
-        setUpMapIfNeeded(); // For setting up the MapFragment
+        createMapIfNeeded(); // For setting up the MapFragment
         handler = new Handler();
         mMessageReceiver = new NewBeaconReceiver(handler);
         return view;
     }
 
     /***** Sets up the map if it is possible to do so *****/
-    public void setUpMapIfNeeded() {
+    public void createMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (map == null) {
             // Try to obtain the map from the SupportMapFragment.
             map = ((SupportMapFragment) MainActivity.fragmentManager
                     .findFragmentById(R.id.map)).getMap();
             // Check if we were successful in obtaining the map.
-            if (map != null)
-                setUpMap();
+
+            if(map != null){
+                map.setIndoorEnabled(true);
+                map.setBuildingsEnabled(true);
+                map.setOnIndoorStateChangeListener(new GoogleMap.OnIndoorStateChangeListener() {
+                    @Override
+                    public void onIndoorBuildingFocused() {
+                        Toast.makeText(getActivity(), "onIndoorBuildingFocused", Toast.LENGTH_SHORT);
+                    }
+
+                    @Override
+                    public void onIndoorLevelActivated(IndoorBuilding indoorBuilding) {
+                        Toast.makeText(getActivity(), "onIndoorLevelActivated",Toast.LENGTH_SHORT);
+                    }
+                });
+
+            }
         }
     }
 
-    private void setUpMap() {
+    private void updateMapWithCurrentInfo() {
+        if (map != null) {
+            map = ((SupportMapFragment) MainActivity.fragmentManager
+                    .findFragmentById(R.id.map)).getMap();
 
-        map.setMyLocationEnabled(true);
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude,
-                longitude), 20.0f));
+            map.setMyLocationEnabled(true);
+            map.setLocationSource(new IPSLocationProvider(getActivity()));
 
-        map.setOnMapClickListener(new TouchListener(handler));
+            map.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+
+                @Override
+                public void onCameraChange(CameraPosition arg0) {
+                    map.setMyLocationEnabled(true);
+
+                    Location location = map.getMyLocation();
+
+                    if (location != null) {
+                        LatLng myLocation = new LatLng(location.getLatitude(),
+                                location.getLongitude());
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation,
+                                20));
+                    }
+
+                    // Remove listener to prevent position reset on camera move.
+                    map.setOnCameraChangeListener(null);
+                }
+            });
+        }
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        // TODO Auto-generated method stub
-        if (map != null)
-            setUpMap();
-
-        if (map == null) {
-            // Try to obtain the map from the SupportMapFragment.
-            map = ((SupportMapFragment) MainActivity.fragmentManager
-                    .findFragmentById(R.id.map)).getMap();
-            // Check if we were successful in obtaining the map.
-            if (map != null)
-                setUpMap();
-        }
-
-//        Button btnSave = (Button)this.getView().findViewById(R.id.btnSave);
-//        btnSave.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                saveLabel();
-//            }
-//        });
-    }
-
-    private void saveLabel(){
-        Log.d("IPS", "Saving label info" );
-//        EditText editText = (EditText) this.getView().findViewById(R.id.editText);
-//        editText.setFocusable(false);
-//        label = editText.getText().toString();
-
-        //Send data to server
-//        sendNewBeaconIdToServer(getActivity());
-//        handler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                Toast.makeText(getActivity(), "Saved location for beacon: " + beaconId, Toast.LENGTH_SHORT).show();
-//            }
-//        });
-
-        //need to update the location view
-//        JsonSender.getDataFromServer(getActivity(), Constants.URL_TO_GET_LOCATION);
-
-        //Raise event for location to update its label
-//        Intent intent = new Intent("new-location-event");
-//        intent.putExtra("message", label);
-//        LocalBroadcastManager.getInstance(this.getActivity()).sendBroadcast(intent);
+        createMapIfNeeded();
     }
 
     private void sendNewBeaconIdToServer(Context context) {
@@ -156,15 +154,20 @@ public class BeaconsFragment extends Fragment {
     @Override
     public void onResume(){
         super.onResume();
+
+        createMapIfNeeded();
+        updateMapWithCurrentInfo();
         // Register mMessageReceiver to receive messages.
         LocalBroadcastManager.getInstance(this.getActivity().getApplicationContext()).registerReceiver(mMessageReceiver,
                 new IntentFilter("my-event"));
         updateTextView();
-        setUpMapIfNeeded();
     }
 
     @Override
     public void onPause(){
+
+        if(map != null) map.setLocationSource(null);
+
         LocalBroadcastManager.getInstance(this.getActivity().getApplicationContext()).unregisterReceiver(mMessageReceiver);
         super.onPause();
 

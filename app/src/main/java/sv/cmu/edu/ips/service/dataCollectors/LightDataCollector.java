@@ -10,7 +10,7 @@ import java.util.List;
 import edu.mit.media.funf.json.IJsonObject;
 import edu.mit.media.funf.probe.Probe;
 import edu.mit.media.funf.probe.builtin.LightSensorProbe;
-import sv.cmu.edu.ips.util.LogUtil;
+import sv.cmu.edu.ips.util.Logger;
 
 /**
  * Created by sumeet on 11/9/14.
@@ -36,9 +36,9 @@ public class LightDataCollector extends SensorDataCollector implements Probe.Dat
     @Override
     public void onDataReceived(IJsonObject iJsonObject, IJsonObject iJsonObject2) {
 
-        LogUtil.log("LightData received");
+        Logger.log("LightData received");
         data.add(iJsonObject2);
-        LogUtil.debug(iJsonObject2.toString());
+        Logger.debug(iJsonObject2.toString());
 
         if(data.size() > getNoOfDataPointsToCollect()){
             lightSensorProbe.unregisterListener(this);
@@ -51,14 +51,14 @@ public class LightDataCollector extends SensorDataCollector implements Probe.Dat
         lightSensorProbe.registerPassiveListener(this);
 
         writeDataToFile("LightData.json", data);
-        LogUtil.log("LightData collection completed");
+        Logger.log("LightData collection completed");
     }
 
     private void registerProbe(Gson gson) {
         lightSensorProbe = gson.fromJson(new JsonObject(), LightSensorProbe.class);
         lightSensorProbe.registerListener(this);
 
-        LogUtil.log("LightData Probe registered");
+        Logger.log("LightData Probe registered");
     }
 
 }

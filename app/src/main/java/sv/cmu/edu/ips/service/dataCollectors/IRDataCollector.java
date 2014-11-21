@@ -12,7 +12,7 @@ import java.util.List;
 import edu.mit.media.funf.json.IJsonObject;
 import sv.cmu.edu.ips.util.ExtAudioRecorder;
 import sv.cmu.edu.ips.util.IPSFileWriter;
-import sv.cmu.edu.ips.util.LogUtil;
+import sv.cmu.edu.ips.util.Logger;
 
 /**
  * Created by sumeet on 11/10/14.
@@ -29,13 +29,23 @@ public class IRDataCollector  extends SensorDataCollector implements ExtAudioRec
     @Override
     public void collectData(Context context, Gson gson){
         super.collectData(context, gson);
-        dataRecorder = ExtAudioRecorder.getInstanse(false, MediaRecorder.AudioSource.DEFAULT );
+        dataRecorder = ExtAudioRecorder.getInstance(false, MediaRecorder.AudioSource.DEFAULT);
         dataList = new ArrayList<ExtAudioRecorder.AudioReadResult>();
 
         dataRecorder.registerDataListener(this);
         dataRecorder.prepare();
         dataRecorder.start();
 
+    }
+
+    public void collectData(Context context, int noOfPointsToCollect){
+        try{
+            setNoOfDataPointsToCollect(noOfPointsToCollect);
+            collectData(context, new Gson());
+        }catch(Exception ex){
+            Logger.log(ex.getMessage());
+            releaseRecorder();
+        }
     }
 
     @Override
@@ -46,34 +56,53 @@ public class IRDataCollector  extends SensorDataCollector implements ExtAudioRec
             onDataCollectionFinished();
         }
 
-        LogUtil.debug("IR data collection " + Arrays.toString(data.buffer));
+        Logger.debug("IR data collection " + Arrays.toString(data.buffer));
     }
 
     @Override
     public  void onDataCollectionFinished(){
-        dataRecorder.stop();
-        dataRecorder.release();
+        releaseRecorder();
 
         writeDataToFile("IRData.json", null);
         super.onDataCollectionFinished();
     }
 
+    public void releaseRecorder() {
+        try{
+            if(dataRecorder != null){
+                dataRecorder.stop();
+                dataRecorder.release();
+            }
+        }catch (Exception ex){
+            Logger.log(ex.getMessage());
+        }
+    }
+
+    public List<ExtAudioRecorder.AudioReadResult> getData(){
+        return  dataList;
+    }
+
     protected void writeDataToFile(String dataFileName, List<IJsonObject> data) {
         if(dataRecorder != null){
             IPSFileWriter fileWriter = new IPSFileWriter(dataFileName);
-            List<Short> shorts = new ArrayList<Short>();
-
-            for(ExtAudioRecorder.AudioReadResult result: dataList){
-                for(short dataPoint : result.buffer){
-                    shorts.add(dataPoint);
-                }
-            }
+            List<Short> shorts = aggregateData();
 
             fileWriter.appendText(shorts.toString());
             fileWriter.close();
 
             dataRecorder = null;
         }
+    }
+
+    public List<Short> aggregateData() {
+        List<Short> shorts = new ArrayList<Short>();
+
+        for(ExtAudioRecorder.AudioReadResult result: dataList){
+            for(short dataPoint : result.buffer){
+                shorts.add(dataPoint);
+            }
+        }
+        return shorts;
     }
 
 }

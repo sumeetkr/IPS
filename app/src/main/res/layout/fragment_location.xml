@@ -45,7 +45,7 @@
                 android:layout_marginTop="7dp"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="80dp"
-                android:id="@+id/txtSignalStrengthGPS"
+                android:id="@+id/txtSignalStrengthIR"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
                 android:text="GPS : 20%"/>

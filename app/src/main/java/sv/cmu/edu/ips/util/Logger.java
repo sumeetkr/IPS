@@ -5,7 +5,7 @@ import android.util.Log;
 /**
  * Created by sumeet on 9/10/14.
  */
-public class LogUtil {
+public class Logger {
     public static final String TAG = "IPS";
     private static final boolean DEBUG = true;
 

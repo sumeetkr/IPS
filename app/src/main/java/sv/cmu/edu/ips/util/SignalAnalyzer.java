@@ -300,11 +300,13 @@ public class SignalAnalyzer {
             beaconId = String.valueOf(getBeconIdFromDecodedString(decodedValue));
 
         } catch (Exception e) {
+            Logger.log(e.getMessage());
             try{
                 String codedData = getManchesterEncodedStringUsingPhaseLock(signalData);
                 String decodedValue = manchesterToBinaryDecoding(codedData.substring(1));
                 beaconId = String.valueOf(getBeconIdFromDecodedString(decodedValue));
             }catch(Exception ex){
+                Logger.log(ex.getMessage());
                 throw ex;
             }
         }

@@ -21,41 +21,6 @@ public class ExtAudioRecorder
     private final static int[] sampleRates = {44100, 22050, 11025, 8000};
     private List<AudioDataArrivedEventListener> dataCollectors = new ArrayList<AudioDataArrivedEventListener>();
 
-    public interface AudioDataArrivedEventListener{
-        void onNewDataArrived(AudioReadResult data);
-    }
-    public static ExtAudioRecorder getInstanse(Boolean recordingCompressed, int audioSourceType )
-    {
-        ExtAudioRecorder result = null;
-
-        if(recordingCompressed)
-        {
-            result = new ExtAudioRecorder(	false,
-                    audioSourceType,
-                    sampleRates[3],
-                    AudioFormat.CHANNEL_CONFIGURATION_MONO,
-                    AudioFormat.ENCODING_PCM_16BIT);
-        }
-        else
-        {
-            int i=0;
-            do
-            {
-                result = new ExtAudioRecorder(	true,
-                        audioSourceType,
-                        sampleRates[i],
-                        AudioFormat.CHANNEL_CONFIGURATION_MONO,
-                        AudioFormat.ENCODING_PCM_16BIT);
-
-            } while((++i<sampleRates.length) & !(result.getState() == ExtAudioRecorder.State.INITIALIZING));
-        }
-        return result;
-    }
-
-    public void registerDataListener(AudioDataArrivedEventListener dataCollector) {
-        dataCollectors.add(dataCollector);
-    }
-
     /**
      * INITIALIZING : recorder is initializing;
      * READY : recorder has been initialized, recorder not yet started
@@ -70,7 +35,7 @@ public class ExtAudioRecorder
 
     // The interval in which the recorded samples are output to the file
     // Used only in uncompressed mode
-    private static final int TIMER_INTERVAL = 120;
+    private static final int TIMER_INTERVAL = 200;
 
     // Toggles uncompressed recording on/off; RECORDING_UNCOMPRESSED / RECORDING_COMPRESSED
     private boolean         rUncompressed;
@@ -116,6 +81,16 @@ public class ExtAudioRecorder
         public int sampleRead;
         public short[] buffer;
         public long timeStamp;
+    }
+
+    /*
+     *
+     * Converts a byte[2] to a short, in LITTLE_ENDIAN format
+     *
+     */
+    private short getShort(byte argB1, byte argB2)
+    {
+        return (short)(argB1 | (argB2 << 8));
     }
 
     /**
@@ -256,7 +231,9 @@ public class ExtAudioRecorder
                     Log.w(ExtAudioRecorder.class.getName(), "Increasing buffer size to " + Integer.toString(bufferSize));
                 }
 
-                audioRecorder = new AudioRecord(audioSource, sampleRate, channelConfig, audioFormat, bufferSize);
+                bufferSize = AudioRecord.getMinBufferSize(44100, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+                bufferSize = bufferSize*20;
+                audioRecorder = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, sampleRate, channelConfig, audioFormat, bufferSize);
 
                 if (audioRecorder.getState() != AudioRecord.STATE_INITIALIZED)
                     throw new Exception("AudioRecord initialization failed");
@@ -594,14 +571,40 @@ public class ExtAudioRecorder
         }
     }
 
-    /*
-     *
-     * Converts a byte[2] to a short, in LITTLE_ENDIAN format
-     *
-     */
-    private short getShort(byte argB1, byte argB2)
+    public interface AudioDataArrivedEventListener{
+        void onNewDataArrived(AudioReadResult data);
+    }
+
+    public static ExtAudioRecorder getInstance(Boolean recordingCompressed, int audioSourceType)
     {
-        return (short)(argB1 | (argB2 << 8));
+        ExtAudioRecorder recorder = null;
+
+        if(recordingCompressed)
+        {
+            recorder = new ExtAudioRecorder(	false,
+                    audioSourceType,
+                    sampleRates[3],
+                    AudioFormat.CHANNEL_CONFIGURATION_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT);
+        }
+        else
+        {
+            int i=0;
+            do
+            {
+                recorder = new ExtAudioRecorder(	true,
+                        audioSourceType,
+                        sampleRates[0],
+                        AudioFormat.CHANNEL_IN_MONO,
+                        AudioFormat.ENCODING_PCM_16BIT);
+
+            } while((++i<sampleRates.length) & !(recorder.getState() == ExtAudioRecorder.State.INITIALIZING));
+        }
+        return recorder;
+    }
+
+    public void registerDataListener(AudioDataArrivedEventListener dataCollector) {
+        dataCollectors.add(dataCollector);
     }
 
 }

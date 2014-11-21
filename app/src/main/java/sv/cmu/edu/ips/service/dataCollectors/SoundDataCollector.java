@@ -12,7 +12,7 @@ import java.util.List;
 import edu.mit.media.funf.json.IJsonObject;
 import sv.cmu.edu.ips.util.ExtAudioRecorder;
 import sv.cmu.edu.ips.util.IPSFileWriter;
-import sv.cmu.edu.ips.util.LogUtil;
+import sv.cmu.edu.ips.util.Logger;
 
 /**
  * Created by sumeet on 11/10/14.
@@ -30,7 +30,7 @@ public class SoundDataCollector extends SensorDataCollector implements ExtAudioR
     @Override
     public void collectData(Context context, Gson gson){
         super.collectData(context, gson);
-        dataRecorder = ExtAudioRecorder.getInstanse(false, MediaRecorder.AudioSource.CAMCORDER );
+        dataRecorder = ExtAudioRecorder.getInstance(false, MediaRecorder.AudioSource.CAMCORDER);
         dataList = new ArrayList<ExtAudioRecorder.AudioReadResult>();
 
         dataRecorder.registerDataListener(this);
@@ -43,7 +43,7 @@ public class SoundDataCollector extends SensorDataCollector implements ExtAudioR
     public void onNewDataArrived(ExtAudioRecorder.AudioReadResult data) {
         dataList.add(data);
 
-        LogUtil.debug("Sound data collection" + Arrays.toString(data.buffer));
+        Logger.debug("Sound data collection" + Arrays.toString(data.buffer));
 
         if(dataList.size() > getNoOfDataPointsToCollect()){
             onDataCollectionFinished();
