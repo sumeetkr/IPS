@@ -143,8 +143,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         @Override
         public Fragment getItem(int position) {
             switch (position) {
-                case 1:
-                    return LocationFragment.newInstance("name1", "name2");
                 case 0:
                     return new MapsFragment();
             }
@@ -154,7 +152,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 2;
+            return 1;
         }
 
         @Override
