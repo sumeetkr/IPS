@@ -1,0 +1,87 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusableInTouchMode="true">
+
+    <!--<LinearLayout-->
+        <!--android:orientation="vertical"-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_alignParentStart="true"-->
+        <!--android:id="@+id/linearLayoutInfoBar">-->
+        <!--<RelativeLayout-->
+            <!--android:orientation="horizontal"-->
+            <!--android:layout_width="fill_parent"-->
+            <!--android:layout_height="wrap_content">-->
+
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginLeft="10dp"-->
+                <!--android:layout_marginTop="17dp"-->
+                <!--android:text="Your location: NA"-->
+                <!--android:id="@+id/txtLocation"/>-->
+
+        <!--</RelativeLayout>-->
+
+        <!--<RelativeLayout-->
+            <!--android:orientation="horizontal"-->
+            <!--android:layout_width="fill_parent"-->
+            <!--android:layout_height="wrap_content">-->
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginTop="7dp"-->
+                <!--android:layout_marginLeft="10dp"-->
+                <!--android:layout_marginBottom="4dp"-->
+                <!--android:text="IPS  90%"-->
+                <!--android:id="@+id/txtSignalStrengthIPS"/>-->
+
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginTop="7dp"-->
+                <!--android:layout_marginLeft="10dp"-->
+                <!--android:id="@+id/txtSignalStrengthIR"-->
+                <!--android:layout_toRightOf="@+id/txtSignalStrengthIPS"-->
+                <!--android:text="Infrared : 20%"/>-->
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginTop="7dp"-->
+                <!--android:layout_marginLeft="10dp"-->
+                <!--android:id="@+id/txtSignalStrengthWiFi"-->
+                <!--android:layout_toRightOf="@+id/txtSignalStrengthIR"-->
+                <!--android:text="WiFi : 20%"/>-->
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginTop="7dp"-->
+                <!--android:layout_marginLeft="10dp"-->
+                <!--android:id="@+id/txtSignalStrengthMagnetic"-->
+                <!--android:layout_toRightOf="@+id/txtSignalStrengthWiFi"-->
+                <!--android:text="Compass : 20%"/>-->
+        <!--</RelativeLayout>-->
+    <!--</LinearLayout>-->
+
+    <!--<LinearLayout-->
+        <!--android:orientation="vertical"-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="fill_parent"-->
+        <!--android:layout_alignParentRight="false"-->
+        <!--android:layout_alignParentEnd="false"-->
+        <!--android:id="@+id/map_layout"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_below="@+id/linearLayoutInfoBar"-->
+        <!--android:layout_alignParentBottom="true">-->
+        <!--<fragment-->
+            <!--android:id="@+id/map"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--class="com.google.android.gms.maps.SupportMapFragment" />-->
+
+        <!--</LinearLayout>-->
+
+</RelativeLayout>

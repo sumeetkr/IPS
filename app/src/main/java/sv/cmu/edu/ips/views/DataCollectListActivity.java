@@ -1,5 +1,6 @@
 package sv.cmu.edu.ips.views;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -30,31 +31,10 @@ import sv.cmu.edu.ips.service.dataCollectors.SensorDataCollector;
 import sv.cmu.edu.ips.util.Constants;
 import sv.cmu.edu.ips.util.IPSFileWriter;
 import sv.cmu.edu.ips.util.Logger;
-import sv.cmu.edu.ips.util.UserInputManager;
 
-/**
- * An activity representing a list of Items. This activity
- * has different presentations for handset and tablet-size devices. On
- * handsets, the activity presents a list of items, which when touched,
- * lead to a {@link DataCollectDetailActivity} representing
- * item details. On tablets, the activity presents the list of items and
- * item details side-by-side using two vertical panes.
- * <p/>
- * The activity makes heavy use of fragments. The list of items is a
- * {@link DataCollectListFragment} and the item details
- * (if present) is a {@link DataCollectDetailFragment}.
- * <p/>
- * This activity also implements the required
- * {@link DataCollectListFragment.Callbacks} interface
- * to listen for item selections.
- */
 public class DataCollectListActivity extends FragmentActivity
         implements DataCollectListFragment.Callbacks {
 
-    /**
-     * Whether or not the activity is in two-pane mode, i.e. running on a tablet
-     * device.
-     */
     private boolean mTwoPane;
     private DataCollectListFragment listFragment;
     private ProgressBar mProgress;
@@ -93,6 +73,7 @@ public class DataCollectListActivity extends FragmentActivity
 
         startButton = (Button) findViewById(R.id.startButton);
         startButton.setText(Constants.START_BUTTON_TEXT);
+//        startButton.setText(Constants.LABEL_BUTTON_TEXT);
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -197,6 +178,22 @@ public class DataCollectListActivity extends FragmentActivity
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode) {
+            case (Constants.DATA_COLLECT_LIST_ACTIVITY_REQUEST_CODE) : {
+                if (resultCode == Activity.RESULT_OK) {
+                    Message msg = new Message();
+                    msg.setData(data.getExtras());
+                    handleMessage(msg);
+                }
+                break;
+            }
+        }
+    }
+
+
     private void destroyFunf() {
         try{
             if(pipeline != null) pipeline.onDestroy();
@@ -209,20 +206,39 @@ public class DataCollectListActivity extends FragmentActivity
     }
 
     private void labelData(){
-        UserInputManager uim = new UserInputManager();
-        Handler.Callback callback = new Handler.Callback() {
-            public boolean handleMessage(Message msg) {
-                if(msg == null){
-                    reset();
-                    startButton.setText(Constants.START_BUTTON_TEXT);
-                }else{
-                    applyLabel(String.valueOf(msg.obj));
-                }
-                return true;
-            }
-        };
 
-        uim.getLabel(this, "Label the sound", callback);
+        Intent startLabelData = new Intent(this, LabelDataActivity.class);
+        startActivityForResult(startLabelData, Constants.DATA_COLLECT_LIST_ACTIVITY_REQUEST_CODE);
+
+//        UserInputManager uim = new UserInputManager();
+//        Handler.Callback callback = new Handler.Callback() {
+//            public boolean handleMessage(Message msg) {
+//                if(msg == null){
+//                    reset();
+//                    startButton.setText(Constants.START_BUTTON_TEXT);
+//                }else{
+//                    applyLabel(String.valueOf(msg.obj));
+//                }
+//                return true;
+//            }
+//        };
+//
+//        uim.getLabel(this, "Label the sound", callback);
+    }
+
+     public boolean handleMessage(Message msg) {
+        if(msg == null){
+            reset();
+            startButton.setText(Constants.START_BUTTON_TEXT);
+        }else{
+            Bundle data = msg.getData();
+            String roomNo = data.getString("room");
+            String floorNo = data.getString("floor");
+            double lat = data.getDouble("lat", 0.00);
+            double lng = data.getDouble("lng", 0.00);
+            applyLabel(roomNo+floorNo);
+        }
+        return true;
     }
 
     private void reset(){
