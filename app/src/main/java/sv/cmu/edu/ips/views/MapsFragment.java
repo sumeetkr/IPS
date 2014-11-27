@@ -51,7 +51,7 @@ public class MapsFragment extends Fragment {
         if (container == null) {
             return null;
         }
-        view = (RelativeLayout) inflater.inflate(R.layout.fragment_beacons, container, false);
+        view = (RelativeLayout) inflater.inflate(R.layout.fragment_map, container, false);
 //        latitude = 37.410372;
 //        longitude = -122.059683;
 

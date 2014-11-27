@@ -9,11 +9,11 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.LinkedList;
 
-public class MicrophoneRecorder{
+import sv.cmu.edu.ips.util.Logger;
+
+public class MicrophoneRecorder extends Thread {
 
     private static final String CLASS_PREFIX = MicrophoneRecorder.class.getName();
     private AudioRecord recorder = null;
@@ -21,45 +21,57 @@ public class MicrophoneRecorder{
     private int sleepInterval = 0;
     private Object syncObject = new Object();
     private boolean isRecording = false;
-    private State state;
 
     public static final int SAMPLING_FREQUENCY = 44100;
-    public enum State {INITIALIZING, READY, RECORDING, ERROR, STOPPED};
-
-    public static MicrophoneRecorder getInstance(boolean recordingCompressed, int audioSourceType) {
-        MicrophoneRecorder recorder = null;
-
-        int i=0;
-        do
-        {
-            recorder = new MicrophoneRecorder();
-
-        } while(!(recorder.getState() == MicrophoneRecorder.State.INITIALIZING));
-        return recorder;
-    }
 
 
-    public class AudioReadResult {
+    private class ReadResult{
         public int sampleRead;
         public short[] buffer;
         public long timeStamp;
     }
 
-    private List<AudioDataArrivedEventListener> dataCollectors = new ArrayList<AudioDataArrivedEventListener>();
+    private LinkedList<ReadResult> queue = new LinkedList<ReadResult>();
+    private Thread consumerThread = new Thread(){
+        public void run(){
+            while(true){
+                ReadResult top = null;
 
-    private MicrophoneRecorder(){
+                synchronized(syncObject){
+
+                    if(queue.size() > 0){
+                        top = queue.poll();
+                    }else{
+                        if(!isRecording){
+                            onRecordEnded();
+                            Log.i(CLASS_PREFIX, "Consumer thread ended.");
+                            break;
+                        }
+                    }
+                }
+
+                if(top != null){
+                    dataArrival(top.timeStamp, top.buffer, top.sampleRead, top.buffer.length);
+                }
+
+                try {
+                    sleep(50);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+            }
+        }
+    };
+
+    public MicrophoneRecorder(){
         super();
         bufferSizeInBytes = AudioRecord.getMinBufferSize(
                 SAMPLING_FREQUENCY,
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT);
-
-        initRecorder();
-        recorder.setRecordPositionUpdateListener(updateListener);
-
-         if(recorder.getState()== AudioRecord.STATE_INITIALIZED){
-             state = State.INITIALIZING;
-         }
+        //this.sleepInterval = sleepInterval;
     }
 
     public int getBufferSizeInBytes(){
@@ -70,9 +82,49 @@ public class MicrophoneRecorder{
         return this.sleepInterval;
     }
 
-    public State getState()
-    {
-        return state;
+
+
+    public void run(){
+        this.consumerThread.start();
+
+        while(isRecording && bufferSizeInBytes > 0) {
+
+            if(recorder.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING)
+                break;
+
+            try{
+                short[] buffer = new short[bufferSizeInBytes / 2];
+                //short[] buffer = new short[bufferSizeInBytes * 10];
+                int numSamplesRead = recorder.read(buffer, 0, buffer.length);
+
+                if(numSamplesRead == AudioRecord.ERROR_INVALID_OPERATION) {
+                    continue;
+                }
+                else if(numSamplesRead == AudioRecord.ERROR_BAD_VALUE) {
+                    continue;
+                }
+
+                ReadResult result = new ReadResult();
+                result.buffer = buffer;
+                result.sampleRead = numSamplesRead;
+                result.timeStamp = System.currentTimeMillis();
+
+                synchronized(this.syncObject){
+                    queue.add(result);
+                }
+
+                //Log.i("Audio", "hi");
+            }catch(Exception recordException){
+                Logger.log(recordException.toString());
+                recordException.printStackTrace();
+
+            }
+
+        }
+
+        this.recorder.stop();
+        this.recorder.release();
+
     }
 
     public void startRecord(){
@@ -87,22 +139,22 @@ public class MicrophoneRecorder{
                     return;
             }
             recorder.startRecording();
+            this.start();
             this.isRecording = true;
 
         }catch(Exception ex){
             ex.printStackTrace();
-            Log.d(Logger.TAG, ex.toString());
+            Logger.log(ex.toString());
         }
     }
 
 
     public void stopRecord(){
         this.isRecording = false;
-        recorder.stop();
     }
 
-    protected void dataArrival(AudioReadResult result){
-        Logger.log(Arrays.toString(result.buffer));
+    protected void dataArrival(long timestamp, short[] data, int length, int frameLength){
+
     }
 
     protected void onRecordEnded(){
@@ -112,173 +164,21 @@ public class MicrophoneRecorder{
 
     private AudioRecord initRecorder(){
         try{
-
-            if(recorder != null){
-                recorder.release();
-                recorder = null;
-            }
             bufferSizeInBytes = AudioRecord.getMinBufferSize(
                     SAMPLING_FREQUENCY,
                     AudioFormat.CHANNEL_IN_MONO,
                     AudioFormat.ENCODING_PCM_16BIT);
 
             this.recorder = new AudioRecord(
-                    MediaRecorder.AudioSource.DEFAULT,
+                    MediaRecorder.AudioSource.MIC,
                     SAMPLING_FREQUENCY,
                     AudioFormat.CHANNEL_IN_MONO,
                     AudioFormat.ENCODING_PCM_16BIT,
                     bufferSizeInBytes * 20);
         }catch(IllegalArgumentException ex){
             ex.printStackTrace();
-            Log.d(Logger.TAG, ex.toString());
+            Logger.log(ex.getMessage());
         }
         return this.recorder;
     }
-
-    public interface AudioDataArrivedEventListener{
-        void onNewDataArrived(AudioReadResult data);
-    }
-
-    public void registerDataListener(AudioDataArrivedEventListener dataCollector) {
-        dataCollectors.add(dataCollector);
-    }
-
-    public void prepare()
-    {
-        try
-        {
-            if (state == State.INITIALIZING)
-            {
-
-                    if((recorder.getState() == AudioRecord.STATE_INITIALIZED))
-                    {
-//                        buffer = new byte[framePeriod*bSamples/8*nChannels];
-                        state = State.READY;
-                    }
-                    else
-                    {
-                        Log.e(ExtAudioRecorder.class.getName(), "prepare() method called on uninitialized recorder");
-                        state = State.ERROR;
-                    }
-            }
-            else
-            {
-                Log.e(ExtAudioRecorder.class.getName(), "prepare() method called on illegal state");
-                release();
-                state = State.ERROR;
-            }
-        }
-        catch(Exception e)
-        {
-            if (e.getMessage() != null)
-            {
-                Log.e(ExtAudioRecorder.class.getName(), e.getMessage());
-            }
-            else
-            {
-                Log.e(ExtAudioRecorder.class.getName(), "Unknown error occured in prepare()");
-            }
-            state = State.ERROR;
-        }
-    }
-
-    public void release()
-    {
-        if (state == State.RECORDING)
-        {
-            stop();
-        }
-        else
-        {
-            if ((state == State.READY) )
-            {
-//                try
-//                {
-//                    if(randomAccessWriter!= null)randomAccessWriter.close(); // Remove prepared file
-//                }
-//                catch (IOException e)
-//                {
-//                    Log.e(ExtAudioRecorder.class.getName(), "I/O exception occured while closing output file");
-//                }
-//
-//                if(filePath != null) (new File(filePath)).delete();
-            }
-        }
-
-
-
-        if (recorder != null)
-        {
-            recorder.release();
-        }
-
-        dataCollectors.clear();
-    }
-
-    public void stop()
-    {
-        if (state == State.RECORDING)
-        {
-                try
-                {
-                    recorder.stop();
-                }
-                catch(Exception e)
-                {
-                    Log.e(ExtAudioRecorder.class.getName(), "I/O exception occured while closing output file");
-                    state = State.ERROR;
-                }
-            state = State.STOPPED;
-        }
-        else
-        {
-            Log.e(ExtAudioRecorder.class.getName(), "stop() called on illegal state");
-            state = State.ERROR;
-        }
-    }
-
-    public void start()
-    {
-        if (state == State.READY)
-        {
-            recorder.startRecording();
-            short[] buffer = new short[bufferSizeInBytes / 2];
-            recorder.read(buffer, 0, buffer.length);
-            state = State.RECORDING;
-        }
-        else
-        {
-            Log.e(ExtAudioRecorder.class.getName(), "start() called on illegal state");
-            state = State.ERROR;
-        }
-    }
-
-    private AudioRecord.OnRecordPositionUpdateListener updateListener = new AudioRecord.OnRecordPositionUpdateListener()
-    {
-        public void onPeriodicNotification(AudioRecord recorder)
-        {
-            short[] buffer = new short[bufferSizeInBytes / 2];
-            int numSamplesRead = recorder.read(buffer, 0, buffer.length); // Fill buffer
-            if(numSamplesRead == AudioRecord.ERROR_INVALID_OPERATION) {
-                return;
-            }
-            else if(numSamplesRead == AudioRecord.ERROR_BAD_VALUE) {
-                return;
-            }
-
-            AudioReadResult result = new AudioReadResult();
-            result.buffer = buffer;
-            result.sampleRead = numSamplesRead;
-            result.timeStamp = System.currentTimeMillis();
-
-            Logger.log("Got a result" + result.timeStamp);
-            dataArrival(result);
-        }
-
-        public void onMarkerReached(AudioRecord recorder)
-        {
-            // NOT USED
-            Log.d("EXTAudioRecorder",recorder.toString());
-        }
-    };
 }

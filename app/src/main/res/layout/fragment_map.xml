@@ -37,7 +37,7 @@
                 android:layout_marginTop="7dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginBottom="4dp"
-                android:text="IPS  90%"
+                android:text="IPS 0.5m"
                 android:id="@+id/txtSignalStrengthIPS"/>
 
             <TextView
@@ -47,7 +47,7 @@
                 android:layout_marginLeft="10dp"
                 android:id="@+id/txtSignalStrengthIR"
                 android:layout_toRightOf="@+id/txtSignalStrengthIPS"
-                android:text="Infrared : 20%"/>
+                android:text="Infrared : 2m"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
                 android:layout_marginLeft="10dp"
                 android:id="@+id/txtSignalStrengthWiFi"
                 android:layout_toRightOf="@+id/txtSignalStrengthIR"
-                android:text="WiFi : 20%"/>
+                android:text="WiFi : 3m"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -63,7 +63,7 @@
                 android:layout_marginLeft="10dp"
                 android:id="@+id/txtSignalStrengthMagnetic"
                 android:layout_toRightOf="@+id/txtSignalStrengthWiFi"
-                android:text="Compass : 20%"/>
+                android:text="Compass : 2m"/>
         </RelativeLayout>
     </LinearLayout>
 
