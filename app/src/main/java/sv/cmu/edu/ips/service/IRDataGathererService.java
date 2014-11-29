@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -154,7 +155,8 @@ public class IRDataGathererService extends Service {
                         Intent intent = new Intent("my-event");
                         // add data
                         intent.putExtra("message", beaconId);
-//                        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+//                        Toast.(getApplicationContext(), "Found beacon " + beaconId, LENGTH_SHORT);
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                     }
                 }catch (Exception e) {
                     Log.d(logLabel, "exception "+ e.getMessage());

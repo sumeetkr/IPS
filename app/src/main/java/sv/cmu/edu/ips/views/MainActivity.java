@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentActivity;
@@ -21,6 +22,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.util.Locale;
 
@@ -80,7 +82,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
         TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
         deviceId = telephonyManager.getDeviceId();
-//        mMessageReceiver = new NewBeaconReceiver(new Handler(), deviceId);
+        mMessageReceiver = new NewBeaconReceiver(new Handler(), deviceId);
 
     }
 
@@ -253,36 +255,36 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 //        }
     }
 
-//    public class NewBeaconReceiver extends BroadcastReceiver {
-//        private final Handler handler;
-//        private final String deviceId;
-//        private String lastSentBeaconId ="";
-//
-//        public NewBeaconReceiver(Handler handler, String deviceId) {
-//            this.handler = handler;
-//            this.deviceId = deviceId;
-//        }
-//
-//        @Override
-//        public void onReceive(final Context context, Intent intent) {
-//            // Extract data included in the Intent
-//            final String beaconId = intent.getStringExtra("message");
-//
-//            if(beaconId != null && !beaconId.isEmpty() && beaconId.compareTo(lastSentBeaconId)!=0){
-//                // Post the UI updating code to our Handler
-//                handler.post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        Toast.makeText(context, "Found New Beacon: " + beaconId, Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-//
-//                onNewBeaconFound(beaconId);
+    public class NewBeaconReceiver extends BroadcastReceiver {
+        private final Handler handler;
+        private final String deviceId;
+        private String lastSentBeaconId ="";
+
+        public NewBeaconReceiver(Handler handler, String deviceId) {
+            this.handler = handler;
+            this.deviceId = deviceId;
+        }
+
+        @Override
+        public void onReceive(final Context context, Intent intent) {
+            // Extract data included in the Intent
+            final String beaconId = intent.getStringExtra("message");
+
+            if(beaconId != null && !beaconId.isEmpty() ){ //&& beaconId.compareTo(lastSentBeaconId)!=0
+                // Post the UI updating code to our Handler
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context, "Found New Beacon: " + beaconId, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                onNewBeaconFound(beaconId);
 //                sendNewBeaconIdToServer(context, beaconId);
-//                lastSentBeaconId = beaconId;
-//            }
-//        }
-//
+                lastSentBeaconId = beaconId;
+            }
+        }
+
 //        private void sendNewBeaconIdToServer(Context context, String beaconId) {
 //            ScannerData data = new ScannerData();
 //            data.setBeaconId(beaconId);
@@ -291,6 +293,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 //            IPSHttpClient.sendToServer(data.getJSON(), context, Constants.URL_TO_SEND_SCANNER_DATA);
 //            Log.d("receiver", "Sent beacon id: " + beaconId);
 //        }
-//    };
+    };
 
 }
