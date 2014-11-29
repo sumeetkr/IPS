@@ -4,6 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -35,16 +39,26 @@ import sv.cmu.edu.ips.util.Logger;
  * in two-pane mode (on tablets) or a {@link LabelDataActivity}
  * on handsets.
  */
-public class LabelDataFragment extends Fragment {
+public class LabelDataFragment extends Fragment implements SensorEventListener {
     private GoogleMap mMap;
     private View rootView;
     private LocationManager locationManager;
     private LatLng location;
+    private SensorManager sensorManager = null;
+    private float currentDegree = 0f;
+    private Sensor accelerometer;
+    private Sensor magnetometer;
+    private Float azimut;
+    private TextView txtOrientation;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sensorManager = (SensorManager)  getActivity().getSystemService(getActivity().SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
     }
 
     @Override
@@ -55,15 +69,32 @@ public class LabelDataFragment extends Fragment {
     }
 
     private void setupView(){
+        txtOrientation = (TextView) rootView.findViewById(R.id.txtOrientation);
         addEventListenersToButtons();
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        registerOrientationSensor();
         setupView();
         setUpMapIfNeeded();
-        alertUserWithVibrationAndSpeech();
+    }
+
+    private void registerOrientationSensor() {
+
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
+        sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
+
+        sensorManager.registerListener(
+                this,
+                sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
+                SensorManager.SENSOR_DELAY_GAME);
+    }
+
+    @Override
+    public void onPause(){
+        sensorManager.unregisterListener(this);
     }
 
     @Override
@@ -94,10 +125,6 @@ public class LabelDataFragment extends Fragment {
         }
     }
 
-    private void alertUserWithVibrationAndSpeech() {
-
-    }
-
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
@@ -114,6 +141,9 @@ public class LabelDataFragment extends Fragment {
                         public void onMapLoaded() {
 
                             mMap.setMyLocationEnabled(true);
+
+                            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+                            mMap.getUiSettings().setCompassEnabled(true);
 
                             if(locationManager == null){
                                 locationManager = (LocationManager) getActivity().getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
@@ -168,6 +198,8 @@ public class LabelDataFragment extends Fragment {
     private void setUpMap() {
         mMap.clear();
         mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        mMap.getUiSettings().setCompassEnabled(true);
 
         CameraUpdate zoom= CameraUpdateFactory.zoomTo(mMap.getMaxZoomLevel()-2);
         mMap.animateCamera(zoom);
@@ -195,5 +227,61 @@ public class LabelDataFragment extends Fragment {
         }catch(Exception ex){
             Logger.log(ex.getMessage());
         }
+    }
+
+//    @Override
+//    public void onSensorChanged(SensorEvent event) {
+//        // get the angle around the z-axis rotated
+//        float degree = Math.round(event.values[0]);
+//
+//        Logger.log("Heading: " + Float.toString(degree) + " degrees");
+//
+//        // create a rotation animation (reverse turn degree degrees)
+//        RotateAnimation ra = new RotateAnimation(
+//                currentDegree,
+//                -degree,
+//                Animation.RELATIVE_TO_SELF, 0.5f,
+//                Animation.RELATIVE_TO_SELF,
+//                0.5f);
+//
+//        // how long the animation will take place
+//        ra.setDuration(210);
+//
+//        // set the animation after the end of the reservation status
+//        ra.setFillAfter(true);
+//
+//        // Start the animation
+//        //image.startAnimation(ra);
+//        currentDegree = -degree;
+//
+//        TextView txtOrientation = (TextView) rootView.findViewById(R.id.txtOrientation);
+//        txtOrientation.setText(Float.toString(currentDegree) + " degrees");
+//
+//    }
+
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {  }
+
+    float[] mGravity;
+    float[] mGeomagnetic;
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+            mGravity = event.values;
+        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
+            mGeomagnetic = event.values;
+        if (mGravity != null && mGeomagnetic != null) {
+            float R[] = new float[9];
+            float I[] = new float[9];
+            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
+            if (success) {
+                float orientation[] = new float[3];
+                SensorManager.getOrientation(R, orientation);
+                azimut = orientation[0]; // orientation contains: azimut, pitch and roll
+                txtOrientation.setText("Orientation: " + Float.toString(orientation[0]) +", "+
+                        Float.toString(orientation[1]) + ", "+
+                        Float.toString(orientation[2]));
+            }
+        }
+
+//        mCustomDrawableView.invalidate();
     }
 }

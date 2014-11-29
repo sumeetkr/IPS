@@ -251,9 +251,9 @@ public class DataCollectListActivity extends FragmentActivity
                 Logger.log(ex.getMessage());
             }
 
-            String label = "room_"+labelInfo.getRoomInfo() + "floor_"+ labelInfo.getFloorInfo();
+            String label = "room_"+labelInfo.getRoomInfo() + "_floor_"+ labelInfo.getFloorInfo();
 
-            if( label != "room_floor_") {
+            if( label != "room__floor_") {
                 //add data collection location label file
                 applyLabel(label);
             }
@@ -319,11 +319,9 @@ public class DataCollectListActivity extends FragmentActivity
             String collectorName = intent.getStringExtra(Constants.SENSOR_TYPE);
 
             Logger.log("Received finish of " + collectorName);
-            if(collectorName != null && collectorName != "" && !listOfProbesWhichFinishedDataCollection.contains(collectorName)){
-                if(listOfProbesWhichFinishedDataCollection != null){
-                    listOfProbesWhichFinishedDataCollection.add(collectorName);
-                    handler.post(runnableUpdateProgress);
-                }
+            if(collectorName != null && collectorName != "" && listOfProbesWhichFinishedDataCollection!= null && !listOfProbesWhichFinishedDataCollection.contains(collectorName)){
+                listOfProbesWhichFinishedDataCollection.add(collectorName);
+                handler.post(runnableUpdateProgress);
             }
         }
     };
