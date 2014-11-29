@@ -34,8 +34,6 @@ public class IRDataGathererService extends Service {
     private boolean isRecording = false;
     private Handler handler;
     private WEAMicrophoneDataRecorder dataRecorder;
-    private int dataCount;
-    private Boolean isListening;
     private String logLabel = "IRDataGathererService";
     private boolean isDataToBeWrittenToFile = false;
 
@@ -94,34 +92,19 @@ public class IRDataGathererService extends Service {
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-      /* do what you need to do */
-            //      foobar();
-      /* and here comes the "trick" */
-            if(isRecording){
-                //stop recording
-                stopRecording();
-                isRecording= false;
-                Log.d("IRDataGathererService", "Recording stopped! :");
-                //start recording after 3 secs
-                handler.postDelayed(this, 5000);
-            }else{
-                //start recording
-                isRecording = true;
-                startRecording();
-                Log.d("IRDataGathererService", "Recording started! :");
-                //stop recording in 200ms
-                handler.postDelayed(this, 300);
-            }
-
+            isRecording = true;
+            startRecording();
+            Logger.log("Recording started! :");
+            //stop recording in 200ms
+            handler.postDelayed(this, 2000);
         }
     };
 
     private void startRecording() {
 
-        dataCount = 0;
         final Context context = this;
+
         dataRecorder = new WEAMicrophoneDataRecorder() {
-            int frameIndex = 0;
             ArrayList<AudioData> aggregatedData= new ArrayList<AudioData>();
 
             @Override
@@ -150,32 +133,36 @@ public class IRDataGathererService extends Service {
                 try {
                     SignalData data = SignalAnalyzer.getSignalInfoStringFromRawSignal(super.getAggregatedData());
                     String beaconId = data.getBeaconId();
-                    Log.d(logLabel, "Got beacon ID "+ beaconId);
+                    Logger.log("Got beacon ID "+ beaconId);
+
                     if(!beaconId.isEmpty() && beaconId.length()>5){
                         Intent intent = new Intent("my-event");
-                        // add data
                         intent.putExtra("message", beaconId);
-//                        Toast.(getApplicationContext(), "Found beacon " + beaconId, LENGTH_SHORT);
                         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                     }
                 }catch (Exception e) {
-                    Log.d(logLabel, "exception "+ e.getMessage());
-                    IPSFileWriter fileWriter = new IPSFileWriter(String.valueOf("error.log"));
-                    fileWriter.appendText(e.getMessage());
-                    fileWriter.close();
+                    Logger.log( "exception "+ e.getMessage());
+                }finally {
+                    isRecording = false;
+                    stopRecording();
                 }
             }
 
         };
 
-        dataRecorder.startRecord();
-        isListening = true;
+        dataRecorder.startRecord(7);
         Log.d(logLabel, "started recording");
     }
 
     private void stopRecording() {
-        isListening = false;
-        if(dataRecorder != null) dataRecorder.stopRecord();
-        Log.d(logLabel, "stopped recording");
+        try{
+            if(dataRecorder != null) {
+                dataRecorder.stopRecord();
+                dataRecorder = null;
+            }
+            Log.d(logLabel, "stopped recording");
+        }catch(Exception ex){
+            Logger.log(ex.getMessage());
+        }
     }
 }

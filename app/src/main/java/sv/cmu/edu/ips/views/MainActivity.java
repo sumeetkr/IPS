@@ -275,7 +275,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(context, "Found New Beacon: " + beaconId, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Found Beacon: " + beaconId, Toast.LENGTH_SHORT).show();
                     }
                 });
 

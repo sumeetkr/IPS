@@ -11,8 +11,6 @@ import android.util.Log;
 
 import java.util.LinkedList;
 
-import sv.cmu.edu.ips.util.Logger;
-
 public class MicrophoneRecorder extends Thread {
 
     private static final String CLASS_PREFIX = MicrophoneRecorder.class.getName();
@@ -21,6 +19,7 @@ public class MicrophoneRecorder extends Thread {
     private int sleepInterval = 0;
     private Object syncObject = new Object();
     private boolean isRecording = false;
+    private int noOfSnippetsToRecord =5;
 
     public static final int SAMPLING_FREQUENCY = 44100;
 
@@ -87,6 +86,7 @@ public class MicrophoneRecorder extends Thread {
     public void run(){
         this.consumerThread.start();
 
+        int snippetsReadCount =0;
         while(isRecording && bufferSizeInBytes > 0) {
 
             if(recorder.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING)
@@ -109,11 +109,14 @@ public class MicrophoneRecorder extends Thread {
                 result.sampleRead = numSamplesRead;
                 result.timeStamp = System.currentTimeMillis();
 
+                snippetsReadCount = snippetsReadCount +1;
                 synchronized(this.syncObject){
                     queue.add(result);
                 }
 
-                //Log.i("Audio", "hi");
+                if(snippetsReadCount > noOfSnippetsToRecord){
+                    stopRecord();
+                }
             }catch(Exception recordException){
                 Logger.log(recordException.toString());
                 recordException.printStackTrace();
@@ -127,9 +130,10 @@ public class MicrophoneRecorder extends Thread {
 
     }
 
-    public void startRecord(){
+    public void startRecord(int noOfSnippets){
         try{
             this.isRecording = false;
+            this.noOfSnippetsToRecord = noOfSnippets;
             if(this.recorder != null){
                 if(recorder.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING){
                     return;

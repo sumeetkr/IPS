@@ -41,6 +41,7 @@ public class WEAMicrophoneDataRecorder extends MicrophoneRecorder {
         aggregatedData = aggregateData();
     }
 
+
     private short [] aggregateData(){
 
         short [] aggregateData = new short[0];
