@@ -32,10 +32,12 @@ public class IRDataGathererService extends Service {
     // RemoteService for a more complete example.
     private final IBinder mBinder = new LocalBinder();
     private boolean isRecording = false;
+    private  boolean isListening = false;
     private Handler handler;
     private WEAMicrophoneDataRecorder dataRecorder;
     private String logLabel = "IRDataGathererService";
     private boolean isDataToBeWrittenToFile = false;
+    private Runnable runnable;
 
 
     public IRDataGathererService() {
@@ -79,7 +81,30 @@ public class IRDataGathererService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        isListening = true;
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                if(isListening){
+                    if(!isRecording){
+                        isRecording = true;
+                        startCollecting();
+                        Logger.log("Recording started! :");
+                    }
+                    //stop recording in 200ms
+                    handler.postDelayed(this, 2000);
+                }
+            }
+        };
+
         return mBinder;
+    }
+
+    @Override
+    public  boolean onUnbind(Intent intent){
+        isListening= false;
+        runnable = null;
+        return true;
     }
 
     private void showNotification() {
@@ -89,18 +114,7 @@ public class IRDataGathererService extends Service {
         Logger.log(text.toString());
     }
 
-    private Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            isRecording = true;
-            startRecording();
-            Logger.log("Recording started! :");
-            //stop recording in 200ms
-            handler.postDelayed(this, 2000);
-        }
-    };
-
-    private void startRecording() {
+    private void startCollecting() {
 
         final Context context = this;
 
