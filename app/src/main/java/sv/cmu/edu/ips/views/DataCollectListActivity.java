@@ -27,6 +27,7 @@ import java.util.Set;
 import edu.mit.media.funf.FunfManager;
 import edu.mit.media.funf.pipeline.BasicPipeline;
 import sv.cmu.edu.ips.R;
+import sv.cmu.edu.ips.data.LabelData;
 import sv.cmu.edu.ips.service.dataCollectors.SensorDataCollector;
 import sv.cmu.edu.ips.util.Constants;
 import sv.cmu.edu.ips.util.IPSFileWriter;
@@ -83,17 +84,18 @@ public class DataCollectListActivity extends FragmentActivity
                     btn.setText(Constants.COLLECTING_BUTTON_TEXT);
                     listOfProbesWhichFinishedDataCollection = new HashSet<String>();
 
-                    mProgress.incrementProgressBy(10);
+//                    mProgress.incrementProgressBy(10);
+                    mProgress.setProgress(10);
                     handler.postDelayed(runnableUpdateProgress, 100);
                     final List<SensorDataCollector> probes = listFragment.getActiveSensorProbes();
                     //IR data and sound data has to be done after others as they use same hardware
                     // Start lengthy operation in a background thread
-                    for(int i=2; i<probes.size(); i++){
+                    for(int i=1; i<probes.size(); i++){
                         final int finalI = i;
                         Thread collectorThread = new Thread(new Runnable() {
                             public void run() {
                                 Gson gson = funfManager.getGson();
-                                probes.get(finalI).collectData(getApplicationContext(), gson);
+                                probes.get(finalI).collectData(getApplicationContext(), gson, true);
                             }
                         });
                         collectorThread.start();
@@ -232,11 +234,29 @@ public class DataCollectListActivity extends FragmentActivity
             startButton.setText(Constants.START_BUTTON_TEXT);
         }else{
             Bundle data = msg.getData();
-            String roomNo = data.getString("room");
-            String floorNo = data.getString("floor");
-            double lat = data.getDouble("lat", 0.00);
-            double lng = data.getDouble("lng", 0.00);
-            applyLabel(roomNo+floorNo);
+
+            LabelData labelInfo = new LabelData();
+            labelInfo.setFloorInfo(data.getString("floor", ""));
+            labelInfo.setRoomInfo(data.getString("room" , ""));
+            labelInfo.setLat(data.getDouble("lat", 0.00));
+            labelInfo.setLng(data.getDouble("lng", 0.00));
+
+            try{
+                IPSFileWriter fileWriter = new IPSFileWriter("label.json");
+                Gson gson = new Gson();
+                String json = gson.toJson(labelInfo);
+                fileWriter.appendText(json);
+                fileWriter.close();
+            }catch(Exception ex){
+                Logger.log(ex.getMessage());
+            }
+
+            String label = "room_"+labelInfo.getRoomInfo() + "floor_"+ labelInfo.getFloorInfo();
+
+            if( label != "room_floor_") {
+                //add data collection location label file
+                applyLabel(label);
+            }
         }
         return true;
     }
@@ -275,18 +295,13 @@ public class DataCollectListActivity extends FragmentActivity
         @Override
         public void run() {
             if(listOfProbesWhichFinishedDataCollection != null){
-                progressStatus = (1 + listOfProbesWhichFinishedDataCollection.size() *100)/(1 +listFragment.getActiveSensorProbes().size());
+                progressStatus = ((1 + listOfProbesWhichFinishedDataCollection.size()) *100)/(1 +listFragment.getActiveSensorProbes().size());
                 mProgress.setProgress(progressStatus);
 
-                if(listOfProbesWhichFinishedDataCollection.size() == (listFragment.getActiveSensorProbes().size() -2)){
+                if(listOfProbesWhichFinishedDataCollection.size() == (listFragment.getActiveSensorProbes().size() -1)){
                     //now collect IR data
                     // && checkIfAudioJackIsIn()
-                    listFragment.getActiveSensorProbes().get(0).collectData(getApplicationContext(), funfManager.getGson());
-                }
-                else if(listOfProbesWhichFinishedDataCollection.size() == (listFragment.getActiveSensorProbes().size() -1)){
-                    //now collect IR data
-                    // && checkIfAudioJackIsIn()
-                    listFragment.getActiveSensorProbes().get(1).collectData(getApplicationContext(), funfManager.getGson());
+                    listFragment.getActiveSensorProbes().get(0).collectData(getApplicationContext(), funfManager.getGson(), true);
                 }
                 else if(listOfProbesWhichFinishedDataCollection.size() == (listFragment.getActiveSensorProbes().size())){
                     startButton.setText(Constants.LABEL_BUTTON_TEXT);

@@ -2,25 +2,18 @@ package sv.cmu.edu.ips.service;
 
 import android.app.NotificationManager;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import com.google.gson.Gson;
 
 import sv.cmu.edu.ips.R;
-import sv.cmu.edu.ips.data.AudioData;
-import sv.cmu.edu.ips.data.SignalData;
-import sv.cmu.edu.ips.util.IPSFileWriter;
+import sv.cmu.edu.ips.service.dataCollectors.AudioDataCollector;
 import sv.cmu.edu.ips.util.Logger;
-import sv.cmu.edu.ips.util.SignalAnalyzer;
-import sv.cmu.edu.ips.util.WEAMicrophoneDataRecorder;
 
 import static android.widget.Toast.LENGTH_SHORT;
 
@@ -34,7 +27,7 @@ public class IRDataGathererService extends Service {
     private boolean isRecording = false;
     private  boolean isListening = false;
     private Handler handler;
-    private WEAMicrophoneDataRecorder dataRecorder;
+    private AudioDataCollector dataRecorder;
     private String logLabel = "IRDataGathererService";
     private boolean isDataToBeWrittenToFile = false;
     private Runnable runnable;
@@ -86,13 +79,13 @@ public class IRDataGathererService extends Service {
             @Override
             public void run() {
                 if(isListening){
-                    if(!isRecording){
+//                    if(!isRecording){
                         isRecording = true;
                         startCollecting();
                         Logger.log("Recording started! :");
-                    }
+//                    }
                     //stop recording in 200ms
-                    handler.postDelayed(this, 2000);
+                    handler.postDelayed(this, 3000);
                 }
             }
         };
@@ -115,68 +108,8 @@ public class IRDataGathererService extends Service {
     }
 
     private void startCollecting() {
-
-        final Context context = this;
-
-        dataRecorder = new WEAMicrophoneDataRecorder() {
-            ArrayList<AudioData> aggregatedData= new ArrayList<AudioData>();
-
-            @Override
-            protected void dataArrival(long timestamp, short[] data,
-                                       int length, int frameLength) {
-                super.dataArrival(timestamp, data, length, frameLength);
-
-                Log.d(logLabel, "data arrived");
-
-                AudioData audioData = new AudioData(timestamp, data);
-                aggregatedData.add(audioData);
-                Log.d(logLabel, "data length"+ data.length);
-                Log.d(logLabel, Arrays.toString(data));
-            }
-
-            @Override
-            protected void onRecordEnded(){
-                super.onRecordEnded();
-
-                if(isDataToBeWrittenToFile) {
-                    IPSFileWriter fileWriter = new IPSFileWriter(String.valueOf(System.currentTimeMillis())+".pcm");
-                    fileWriter.appendText(Arrays.toString(super.getAggregatedData()));
-                    fileWriter.close();
-                }
-
-                try {
-                    SignalData data = SignalAnalyzer.getSignalInfoStringFromRawSignal(super.getAggregatedData());
-                    String beaconId = data.getBeaconId();
-                    Logger.log("Got beacon ID "+ beaconId);
-
-                    if(!beaconId.isEmpty() && beaconId.length()>5){
-                        Intent intent = new Intent("my-event");
-                        intent.putExtra("message", beaconId);
-                        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-                    }
-                }catch (Exception e) {
-                    Logger.log( "exception "+ e.getMessage());
-                }finally {
-                    isRecording = false;
-                    stopRecording();
-                }
-            }
-
-        };
-
-        dataRecorder.startRecord(7);
+        dataRecorder = new AudioDataCollector("1", "AudioData");
+        dataRecorder.collectData(getApplicationContext(), new Gson(), false);
         Log.d(logLabel, "started recording");
-    }
-
-    private void stopRecording() {
-        try{
-            if(dataRecorder != null) {
-                dataRecorder.stopRecord();
-                dataRecorder = null;
-            }
-            Log.d(logLabel, "stopped recording");
-        }catch(Exception ex){
-            Logger.log(ex.getMessage());
-        }
     }
 }

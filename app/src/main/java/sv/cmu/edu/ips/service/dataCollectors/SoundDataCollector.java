@@ -28,8 +28,8 @@ public class SoundDataCollector extends SensorDataCollector implements ExtAudioR
     }
 
     @Override
-    public void collectData(Context context, Gson gson){
-        super.collectData(context, gson);
+    public void collectData(Context context, Gson gson, boolean toBeWritten){
+        super.collectData(context, gson, toBeWritten);
         dataRecorder = ExtAudioRecorder.getInstance(false, MediaRecorder.AudioSource.CAMCORDER);
         dataList = new ArrayList<ExtAudioRecorder.AudioReadResult>();
 
@@ -46,17 +46,17 @@ public class SoundDataCollector extends SensorDataCollector implements ExtAudioR
         Logger.debug("Sound data collection" + Arrays.toString(data.buffer));
 
         if(dataList.size() > getNoOfDataPointsToCollect()){
-            onDataCollectionFinished();
+            notifyForDataCollectionFinished();
         }
     }
 
     @Override
-    public  void onDataCollectionFinished(){
+    public  void notifyForDataCollectionFinished(){
         dataRecorder.stop();
         dataRecorder.release();
 
         writeDataToFile("SoundData.json", null);
-        super.onDataCollectionFinished();
+        super.notifyForDataCollectionFinished();
     }
 
     protected void writeDataToFile(String dataFileName, List<IJsonObject> data) {

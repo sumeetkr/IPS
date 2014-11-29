@@ -20,6 +20,7 @@ public class SensorDataCollector {
     private String name;
     private String description;
     private int noOfDataPointsToCollect = 10;
+    private boolean dataToBeWrittenToFile = false;
     Context context;
 
     public SensorDataCollector(String id, String name){
@@ -56,8 +57,9 @@ public class SensorDataCollector {
 
     }
 
-    public  void collectData(Context context, Gson gson){
+    public  void collectData(Context context, Gson gson, boolean toBeWritten){
         this.context = context;
+        dataToBeWrittenToFile = toBeWritten;
         collectData(gson);
     }
 
@@ -85,14 +87,12 @@ public class SensorDataCollector {
         fileWriter.appendText("]");
         fileWriter.close();
 
-        onDataCollectionFinished();
+        notifyForDataCollectionFinished();
     }
 
-    protected void onDataCollectionFinished(){
+    protected void notifyForDataCollectionFinished(){
         Intent intent = new Intent(Constants.DATA_COLLECTION_FINISHED);
         intent.putExtra(Constants.SENSOR_TYPE, getName());
-
-
         if(context != null) context.sendBroadcast(intent);
     }
 }

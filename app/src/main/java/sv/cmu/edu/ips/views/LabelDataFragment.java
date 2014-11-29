@@ -169,7 +169,7 @@ public class LabelDataFragment extends Fragment {
         mMap.clear();
         mMap.setMyLocationEnabled(true);
 
-        CameraUpdate zoom= CameraUpdateFactory.zoomTo(mMap.getMaxZoomLevel());
+        CameraUpdate zoom= CameraUpdateFactory.zoomTo(mMap.getMaxZoomLevel()-2);
         mMap.animateCamera(zoom);
 
         drawPolygon();

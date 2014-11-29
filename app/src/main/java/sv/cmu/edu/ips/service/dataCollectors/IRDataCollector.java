@@ -27,8 +27,8 @@ public class IRDataCollector  extends SensorDataCollector implements ExtAudioRec
     }
 
     @Override
-    public void collectData(Context context, Gson gson){
-        super.collectData(context, gson);
+    public void collectData(Context context, Gson gson, boolean toBeWritten){
+        super.collectData(context, gson, toBeWritten);
         dataRecorder = ExtAudioRecorder.getInstance(false, MediaRecorder.AudioSource.DEFAULT);
         dataList = new ArrayList<ExtAudioRecorder.AudioReadResult>();
 
@@ -41,7 +41,7 @@ public class IRDataCollector  extends SensorDataCollector implements ExtAudioRec
     public void collectData(Context context, int noOfPointsToCollect){
         try{
             setNoOfDataPointsToCollect(noOfPointsToCollect);
-            collectData(context, new Gson());
+            collectData(context, new Gson(), false);
         }catch(Exception ex){
             Logger.log(ex.getMessage());
             releaseRecorder();
@@ -53,18 +53,18 @@ public class IRDataCollector  extends SensorDataCollector implements ExtAudioRec
         dataList.add(data);
 
         if(dataList.size() > getNoOfDataPointsToCollect()){
-            onDataCollectionFinished();
+            notifyForDataCollectionFinished();
         }
 
         Logger.debug("IR data collection " + Arrays.toString(data.buffer));
     }
 
     @Override
-    public  void onDataCollectionFinished(){
+    public  void notifyForDataCollectionFinished(){
         releaseRecorder();
 
         writeDataToFile("IRData.json", null);
-        super.onDataCollectionFinished();
+        super.notifyForDataCollectionFinished();
     }
 
     public void releaseRecorder() {
