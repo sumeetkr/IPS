@@ -13,6 +13,8 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,12 +66,46 @@ public class LabelDataFragment extends Fragment implements SensorEventListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_label_data_detail, container, false);
+        EditText txtRoomNo = (EditText) rootView.findViewById(R.id.editTextRoomNo);
+        final Button btnFeedback = (Button) rootView.findViewById(R.id.buttonFeedback);
 
+        txtRoomNo.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s != null && s.toString() != "") {
+                    btnFeedback.setEnabled(true);
+                } else {
+                    btnFeedback.setEnabled(false);
+                }
+            }
+        });
+
+//        txtRoomNo.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+//            @Override
+//            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+//                if (v.getText() != null && v.getText().toString() != "") {
+//                    btnFeedback.setEnabled(true);
+//                } else {
+//                    btnFeedback.setEnabled(false);
+//                }
+//                return false;
+//            }
+//        });
         return rootView;
     }
 
     private void setupView(){
-        txtOrientation = (TextView) rootView.findViewById(R.id.txtOrientation);
+//        txtOrientation = (TextView) rootView.findViewById(R.id.txtOrientation);
         addEventListenersToButtons();
     }
 
@@ -83,18 +119,19 @@ public class LabelDataFragment extends Fragment implements SensorEventListener {
 
     private void registerOrientationSensor() {
 
-        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
-        sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
-
-        sensorManager.registerListener(
-                this,
-                sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
-                SensorManager.SENSOR_DELAY_GAME);
+//        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+//        sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
+//
+//        sensorManager.registerListener(
+//                this,
+//                sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
+//                SensorManager.SENSOR_DELAY_GAME);
     }
 
     @Override
     public void onPause(){
-        sensorManager.unregisterListener(this);
+//        sensorManager.unregisterListener(this);
+        super.onPause();
     }
 
     @Override
@@ -110,15 +147,32 @@ public class LabelDataFragment extends Fragment implements SensorEventListener {
                 @Override
                 public void onClick(View v) {
                     EditText txtRoomNo = (EditText) rootView.findViewById(R.id.editTextRoomNo);
-                    EditText txtFloorNo = (EditText) rootView.findViewById(R.id.editTextFloorNo);
 
-                    Intent resultIntent = new Intent();
-                    resultIntent.putExtra("room",txtRoomNo.getText().toString());
-                    resultIntent.putExtra("floor",txtFloorNo.getText().toString());
-                    resultIntent.putExtra("lat", location.latitude);
-                    resultIntent.putExtra("lng", location.longitude);
-                    activity.setResult(Activity.RESULT_OK, resultIntent);
-                    activity.finish();
+                    if(txtRoomNo.getText() != null && txtRoomNo.getText().toString() != ""){
+                        EditText txtX = (EditText) rootView.findViewById(R.id.txtXValue);
+                        EditText txtY = (EditText) rootView.findViewById(R.id.txtYValue);
+
+                        Intent resultIntent = new Intent();
+                        resultIntent.putExtra("room",txtRoomNo.getText().toString());
+
+                        if(location != null){
+                            resultIntent.putExtra("lat", location.latitude);
+                            resultIntent.putExtra("lng", location.longitude);
+                        }
+
+                        if(txtX.getText() != null && txtX.getText().toString().length()>0 &&
+                                txtY.getText() != null && txtY.getText().toString().length()>0){
+                            try{
+                                resultIntent.putExtra("x", Double.parseDouble(txtX.getText().toString()));
+                                resultIntent.putExtra("y", Double.parseDouble(txtY.getText().toString()));
+                            }catch(Exception ex){
+                                Logger.log(ex.getMessage());
+                            }
+                        }
+
+                        activity.setResult(Activity.RESULT_OK, resultIntent);
+                        activity.finish();
+                    }
                 }
             });
 
@@ -264,11 +318,31 @@ public class LabelDataFragment extends Fragment implements SensorEventListener {
     float[] mGravity;
     float[] mGeomagnetic;
     public void onSensorChanged(SensorEvent event) {
+        if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
+            return;
+        }
+
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
-            mGravity = event.values;
+            mGravity = event.values.clone ();
         if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
-            mGeomagnetic = event.values;
+            mGeomagnetic = event.values.clone ();
+
+
         if (mGravity != null && mGeomagnetic != null) {
+
+//            float[] rotationMatrixA = mRotationMatrixA;
+//            if (SensorManager.getRotationMatrix(rotationMatrixA, null, mGravity, mGeomagnetic)) {
+//
+//                float[] rotationMatrixB = mRotationMatrixB;
+//                SensorManager.remapCoordinateSystem(rotationMatrixA,
+//                        SensorManager.AXIS_X, SensorManager.AXIS_Z,
+//                        rotationMatrixB);
+//                float[] dv = new float[3];
+//                SensorManager.getOrientation(rotationMatrixB, dv);
+//                // add to smoothing filter
+//                fd.AddLatest((double)dv[0]);
+//            }
+
             float R[] = new float[9];
             float I[] = new float[9];
             boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
@@ -276,9 +350,16 @@ public class LabelDataFragment extends Fragment implements SensorEventListener {
                 float orientation[] = new float[3];
                 SensorManager.getOrientation(R, orientation);
                 azimut = orientation[0]; // orientation contains: azimut, pitch and roll
-                txtOrientation.setText("Orientation: " + Float.toString(orientation[0]) +", "+
-                        Float.toString(orientation[1]) + ", "+
-                        Float.toString(orientation[2]));
+                String angle = Float.toString(orientation[0]* 360 / (2 * 3.14159f));
+
+                if(angle != "" && angle.length()>5){
+                    txtOrientation.setText("Orientation: " + angle.substring(0,5) + " degree");
+                }else{
+                    txtOrientation.setText("Orientation: " + angle + " degree");
+                }
+//                        +", "+
+//                        Float.toString(orientation[1]) + ", "+
+//                        Float.toString(orientation[2]));
             }
         }
 

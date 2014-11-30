@@ -236,10 +236,11 @@ public class DataCollectListActivity extends FragmentActivity
             Bundle data = msg.getData();
 
             LabelData labelInfo = new LabelData();
-            labelInfo.setFloorInfo(data.getString("floor", ""));
             labelInfo.setRoomInfo(data.getString("room" , ""));
             labelInfo.setLat(data.getDouble("lat", 0.00));
             labelInfo.setLng(data.getDouble("lng", 0.00));
+            labelInfo.setX(data.getDouble("x", 0.00));
+            labelInfo.setY(data.getDouble("y", 0.00));
 
             try{
                 IPSFileWriter fileWriter = new IPSFileWriter("label.json");
@@ -251,9 +252,9 @@ public class DataCollectListActivity extends FragmentActivity
                 Logger.log(ex.getMessage());
             }
 
-            String label = "room_"+labelInfo.getRoomInfo() + "_floor_"+ labelInfo.getFloorInfo();
+            String label = "room_"+labelInfo.getRoomInfo();
 
-            if( label != "room__floor_") {
+            if( label != "room_") {
                 //add data collection location label file
                 applyLabel(label);
             }

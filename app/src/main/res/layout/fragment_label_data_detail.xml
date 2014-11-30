@@ -37,6 +37,72 @@
 
         </RelativeLayout>
 
+        <!--<RelativeLayout-->
+            <!--android:orientation="horizontal"-->
+            <!--android:layout_width="fill_parent"-->
+            <!--android:layout_height="wrap_content">-->
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginTop="5dp"-->
+                <!--android:layout_marginLeft="10dp"-->
+                <!--android:layout_marginBottom="4dp"-->
+                <!--android:text="Floor no: "-->
+                <!--android:id="@+id/txtViewFloorNo"/>-->
+            <!--<EditText-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginTop="5dp"-->
+                <!--android:layout_marginLeft="10dp"-->
+                <!--android:layout_marginBottom="4dp"-->
+                <!--android:layout_toRightOf="@+id/txtViewFloorNo"-->
+                <!--android:id="@+id/editTextFloorNo"-->
+                <!--android:hint="e.g. 2 or 2nd floor"/>-->
+        <!--</RelativeLayout>-->
+
+        <RelativeLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginBottom="4dp"
+                android:text="X: "
+                android:id="@+id/txtX"/>
+            <EditText
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginBottom="4dp"
+                android:layout_toRightOf="@+id/txtX"
+                android:hint="optional"
+                android:id="@+id/txtXValue"
+                android:inputType="numberDecimal" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="4dp"
+                android:layout_toRightOf="@+id/txtXValue"
+                android:text="Y: "
+                android:id="@+id/txtY"/>
+            <EditText
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginBottom="4dp"
+                android:layout_toRightOf="@+id/txtY"
+                android:hint="optional"
+                android:id="@+id/txtYValue"
+                android:inputType="numberDecimal" />
+
+        </RelativeLayout>
         <RelativeLayout
             android:orientation="horizontal"
             android:layout_width="fill_parent"
@@ -47,17 +113,17 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginBottom="4dp"
-                android:text="Floor no: "
-                android:id="@+id/txtViewFloorNo"/>
-            <EditText
+                android:text="Infrared Beacon: "
+                android:id="@+id/txtViewBeaconId"/>
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginBottom="4dp"
-                android:layout_toRightOf="@+id/txtViewFloorNo"
-                android:id="@+id/editTextFloorNo"
-                android:hint="e.g. 2 or 2nd floor"/>
+                android:text="NA - Check About page to get a beacon."
+                android:layout_toRightOf="@+id/txtViewBeaconId"
+                android:id="@+id/txtBeconId"/>
         </RelativeLayout>
 
         <RelativeLayout
@@ -81,29 +147,6 @@
                 android:hint="Pick a point on the map"
                 android:layout_toRightOf="@+id/txtCoordinates"
                 android:id="@+id/txtCoordinatesSelected"/>
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:orientation="horizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginBottom="4dp"
-                android:text="Orientation: "
-                android:id="@+id/txtOrientation"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginBottom="4dp"
-                android:hint="Rotate to change"
-                android:layout_toRightOf="@+id/txtOrientation"
-                android:id="@+id/txtOrientationSelected"/>
         </RelativeLayout>
     </LinearLayout>
 
@@ -137,6 +180,7 @@
             android:text="Save"
             android:id="@+id/buttonFeedback"
             android:layout_alignParentRight="true"
+            android:enabled="false"
             android:layout_weight="0.20" />
     </LinearLayout>
 </RelativeLayout>
