@@ -6,11 +6,11 @@ package sv.cmu.edu.ips.data;
 public class LabelData {
 
     private String roomInfo;
-//    private String floorInfo;
     private double lat;
     private double lng;
     private double x;
     private double y;
+    private String beaconId;
 
     public String getRoomInfo() {
         return roomInfo;
@@ -19,14 +19,6 @@ public class LabelData {
     public void setRoomInfo(String roomInfo) {
         this.roomInfo = roomInfo;
     }
-
-//    public String getFloorInfo() {
-//        return floorInfo;
-//    }
-//
-//    public void setFloorInfo(String floorInfo) {
-//        this.floorInfo = floorInfo;
-//    }
 
     public double getLat() {
         return lat;
@@ -58,6 +50,14 @@ public class LabelData {
 
     public void setY(double y) {
         this.y = y;
+    }
+
+    public String getBeaconId() {
+        return beaconId;
+    }
+
+    public void setBeaconId(String beaconId) {
+        this.beaconId = beaconId;
     }
 
     public class Orientation{

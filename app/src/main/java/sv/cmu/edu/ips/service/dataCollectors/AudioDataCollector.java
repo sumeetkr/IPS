@@ -23,6 +23,8 @@ public class AudioDataCollector extends SensorDataCollector {
 
     private WEAMicrophoneDataRecorder dataRecorder;
     private String fileName;
+    String anyBeaconId= "";
+
     public AudioDataCollector(String id, String name) {
         super(id, name);
         fileName = name + ".json";
@@ -60,9 +62,10 @@ public class AudioDataCollector extends SensorDataCollector {
                     Logger.log("Got beacon ID " + beaconId);
 
                     if(!beaconId.isEmpty() && beaconId.length()>5){
+                        anyBeaconId = beaconId;
                         Intent intent = new Intent("my-event");
                         intent.putExtra("message", beaconId);
-                    LocalBroadcastManager.getInstance(ctxt).sendBroadcast(intent);
+                        LocalBroadcastManager.getInstance(ctxt).sendBroadcast(intent);
                     }
                 }catch (Exception e) {
                     Logger.log( "exception "+ e.getMessage());
@@ -74,7 +77,7 @@ public class AudioDataCollector extends SensorDataCollector {
                         fileWriter.close();
                     }
 
-                    informSuperOfDataCollectionFinish();
+                    informSuperOfDataCollectionFinish(anyBeaconId);
                 }
             }
 
@@ -95,7 +98,7 @@ public class AudioDataCollector extends SensorDataCollector {
         }
     }
 
-    private void informSuperOfDataCollectionFinish(){
-        super.notifyForDataCollectionFinished();
+    private void informSuperOfDataCollectionFinish(String beaconId){
+        super.notifyForDataCollectionFinished("beaconId", beaconId);
     }
 }

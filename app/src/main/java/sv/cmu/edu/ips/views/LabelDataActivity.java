@@ -77,7 +77,7 @@ public class LabelDataActivity extends FragmentActivity {
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, DataCollectListActivity.class);
         startActivity(intent);
     }
 

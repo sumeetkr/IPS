@@ -46,6 +46,7 @@ public class DataCollectListActivity extends FragmentActivity
     private Handler handler = new Handler();
     private Set<String> listOfProbesWhichFinishedDataCollection;
     private ServiceConnection funfManagerConn;
+    private String beaconId= "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -210,6 +211,9 @@ public class DataCollectListActivity extends FragmentActivity
     private void labelData(){
 
         Intent startLabelData = new Intent(this, LabelDataActivity.class);
+        if(beaconId != ""){
+            startLabelData.putExtra("beaconId", beaconId);
+        }
         startActivityForResult(startLabelData, Constants.DATA_COLLECT_LIST_ACTIVITY_REQUEST_CODE);
 
 //        UserInputManager uim = new UserInputManager();
@@ -241,6 +245,7 @@ public class DataCollectListActivity extends FragmentActivity
             labelInfo.setLng(data.getDouble("lng", 0.00));
             labelInfo.setX(data.getDouble("x", 0.00));
             labelInfo.setY(data.getDouble("y", 0.00));
+            labelInfo.setBeaconId(beaconId);
 
             try{
                 IPSFileWriter fileWriter = new IPSFileWriter("label.json");
@@ -318,6 +323,9 @@ public class DataCollectListActivity extends FragmentActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             String collectorName = intent.getStringExtra(Constants.SENSOR_TYPE);
+            if(intent.hasExtra("beaconId")){
+                beaconId = intent.getStringExtra("beaconId");
+            }
 
             Logger.log("Received finish of " + collectorName);
             if(collectorName != null && collectorName != "" && listOfProbesWhichFinishedDataCollection!= null && !listOfProbesWhichFinishedDataCollection.contains(collectorName)){

@@ -90,23 +90,21 @@ public class LabelDataFragment extends Fragment implements SensorEventListener {
             }
         });
 
-//        txtRoomNo.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-//            @Override
-//            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-//                if (v.getText() != null && v.getText().toString() != "") {
-//                    btnFeedback.setEnabled(true);
-//                } else {
-//                    btnFeedback.setEnabled(false);
-//                }
-//                return false;
-//            }
-//        });
         return rootView;
     }
 
     private void setupView(){
 //        txtOrientation = (TextView) rootView.findViewById(R.id.txtOrientation);
         addEventListenersToButtons();
+
+        Intent activityIntent = getActivity().getIntent();
+        if(activityIntent.hasExtra("beaconId")){
+            String beaconId = activityIntent.getStringExtra("beaconId");
+            if(beaconId != null && beaconId.length()>0){
+                TextView txtBeaconId = (TextView) rootView.findViewById(R.id.txtBeconId);
+                txtBeaconId.setText(beaconId);
+            }
+        }
     }
 
     @Override

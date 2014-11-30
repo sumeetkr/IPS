@@ -95,4 +95,11 @@ public class SensorDataCollector {
         intent.putExtra(Constants.SENSOR_TYPE, getName());
         if(context != null) context.sendBroadcast(intent);
     }
+
+    protected void notifyForDataCollectionFinished(String extraKey, String extraValue){
+        Intent intent = new Intent(Constants.DATA_COLLECTION_FINISHED);
+        intent.putExtra(Constants.SENSOR_TYPE, getName());
+        intent.putExtra(extraKey, extraValue);
+        if(context != null) context.sendBroadcast(intent);
+    }
 }
