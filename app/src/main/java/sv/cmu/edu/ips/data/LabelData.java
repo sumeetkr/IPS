@@ -1,5 +1,7 @@
 package sv.cmu.edu.ips.data;
 
+import com.google.gson.Gson;
+
 /**
  * Created by sumeet on 11/29/14.
  */
@@ -88,5 +90,10 @@ public class LabelData {
         public void setOrientZValue(String orientZValue) {
             this.orientZValue = orientZValue;
         }
+    }
+
+    public static LabelData getLabelDataFromJsonString(String json){
+        Gson gson = new Gson();
+        return gson.fromJson(json, LabelData.class);
     }
 }

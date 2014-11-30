@@ -3,7 +3,6 @@ package sv.cmu.edu.ips.views;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -28,10 +27,14 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolygonOptions;
+
+import java.util.List;
 
 import sv.cmu.edu.ips.R;
+import sv.cmu.edu.ips.data.LabelData;
+import sv.cmu.edu.ips.util.IPSFileReader;
 import sv.cmu.edu.ips.util.Logger;
 
 
@@ -52,6 +55,7 @@ public class LabelDataFragment extends Fragment implements SensorEventListener {
     private Sensor magnetometer;
     private Float azimut;
     private TextView txtOrientation;
+    private Marker currentMarker;
 
 
     @Override
@@ -209,6 +213,8 @@ public class LabelDataFragment extends Fragment implements SensorEventListener {
                                     mMap.moveCamera(center);
                                 }
                             }
+
+                            addLabeledDataPoints();
                         }
                     });
 
@@ -231,9 +237,14 @@ public class LabelDataFragment extends Fragment implements SensorEventListener {
                         public void onMapClick(LatLng latLng) {
                             location = latLng;
                             mMap.clear();
-                            mMap.addMarker(new MarkerOptions()
-                                    .position(latLng)
-                                    .title("Selected location"));
+
+                            if(currentMarker != null){
+                                currentMarker.remove();
+                            }
+
+                            currentMarker = mMap.addMarker(new MarkerOptions()
+                                        .position(latLng)
+                                        .title("Selected location"));
 
                             TextView txtCoordinate = (TextView) rootView.findViewById(R.id.txtCoordinatesSelected);
                             txtCoordinate.setText(latLng.latitude + ", " + latLng.longitude);
@@ -256,25 +267,20 @@ public class LabelDataFragment extends Fragment implements SensorEventListener {
         CameraUpdate zoom= CameraUpdateFactory.zoomTo(mMap.getMaxZoomLevel()-2);
         mMap.animateCamera(zoom);
 
-        drawPolygon();
     }
 
-    private void drawPolygon(){
+    private void addLabeledDataPoints(){
         try{
             if(mMap!=null){
-                PolygonOptions polyOptions = new PolygonOptions()
-                        .strokeColor(Color.RED);
-
-//                GeoLocation[] locations = alert.getPolygon();
-//
-//                if(locations != null & locations.length>2){
-//                    for(GeoLocation location:locations){
-//                        polyOptions.add(new LatLng(Double.parseDouble(location.getLat()), Double.parseDouble(location.getLng())));
-//                    }
-//
-//                    mMap.addPolygon(polyOptions);
-//                    setCenter();
-//                }
+                List<LabelData> labels = IPSFileReader.getLabelData();
+                for(LabelData label: labels){
+                    LatLng latLng = new LatLng(label.getLat(), label.getLng());
+                    mMap.addMarker(new MarkerOptions()
+                            .position(latLng)
+//                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_location))
+                            .alpha(0.3f)
+                            .title(label.getRoomInfo()));
+                }
             }
         }catch(Exception ex){
             Logger.log(ex.getMessage());
