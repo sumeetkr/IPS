@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -44,7 +42,7 @@ import sv.cmu.edu.ips.util.Logger;
  * in two-pane mode (on tablets) or a {@link LabelDataActivity}
  * on handsets.
  */
-public class LabelDataFragment extends Fragment implements SensorEventListener {
+public class LabelDataFragment extends Fragment{
     private GoogleMap mMap;
     private View rootView;
     private LocationManager locationManager;
@@ -114,25 +112,12 @@ public class LabelDataFragment extends Fragment implements SensorEventListener {
     @Override
     public void onResume() {
         super.onResume();
-        registerOrientationSensor();
         setupView();
         setUpMapIfNeeded();
     }
 
-    private void registerOrientationSensor() {
-
-//        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-//        sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
-//
-//        sensorManager.registerListener(
-//                this,
-//                sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
-//                SensorManager.SENSOR_DELAY_GAME);
-    }
-
     @Override
     public void onPause(){
-//        sensorManager.unregisterListener(this);
         super.onPause();
     }
 
@@ -285,88 +270,5 @@ public class LabelDataFragment extends Fragment implements SensorEventListener {
         }catch(Exception ex){
             Logger.log(ex.getMessage());
         }
-    }
-
-//    @Override
-//    public void onSensorChanged(SensorEvent event) {
-//        // get the angle around the z-axis rotated
-//        float degree = Math.round(event.values[0]);
-//
-//        Logger.log("Heading: " + Float.toString(degree) + " degrees");
-//
-//        // create a rotation animation (reverse turn degree degrees)
-//        RotateAnimation ra = new RotateAnimation(
-//                currentDegree,
-//                -degree,
-//                Animation.RELATIVE_TO_SELF, 0.5f,
-//                Animation.RELATIVE_TO_SELF,
-//                0.5f);
-//
-//        // how long the animation will take place
-//        ra.setDuration(210);
-//
-//        // set the animation after the end of the reservation status
-//        ra.setFillAfter(true);
-//
-//        // Start the animation
-//        //image.startAnimation(ra);
-//        currentDegree = -degree;
-//
-//        TextView txtOrientation = (TextView) rootView.findViewById(R.id.txtOrientation);
-//        txtOrientation.setText(Float.toString(currentDegree) + " degrees");
-//
-//    }
-
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {  }
-
-    float[] mGravity;
-    float[] mGeomagnetic;
-    public void onSensorChanged(SensorEvent event) {
-        if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
-            return;
-        }
-
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
-            mGravity = event.values.clone ();
-        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
-            mGeomagnetic = event.values.clone ();
-
-
-        if (mGravity != null && mGeomagnetic != null) {
-
-//            float[] rotationMatrixA = mRotationMatrixA;
-//            if (SensorManager.getRotationMatrix(rotationMatrixA, null, mGravity, mGeomagnetic)) {
-//
-//                float[] rotationMatrixB = mRotationMatrixB;
-//                SensorManager.remapCoordinateSystem(rotationMatrixA,
-//                        SensorManager.AXIS_X, SensorManager.AXIS_Z,
-//                        rotationMatrixB);
-//                float[] dv = new float[3];
-//                SensorManager.getOrientation(rotationMatrixB, dv);
-//                // add to smoothing filter
-//                fd.AddLatest((double)dv[0]);
-//            }
-
-            float R[] = new float[9];
-            float I[] = new float[9];
-            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
-            if (success) {
-                float orientation[] = new float[3];
-                SensorManager.getOrientation(R, orientation);
-                azimut = orientation[0]; // orientation contains: azimut, pitch and roll
-                String angle = Float.toString(orientation[0]* 360 / (2 * 3.14159f));
-
-                if(angle != "" && angle.length()>5){
-                    txtOrientation.setText("Orientation: " + angle.substring(0,5) + " degree");
-                }else{
-                    txtOrientation.setText("Orientation: " + angle + " degree");
-                }
-//                        +", "+
-//                        Float.toString(orientation[1]) + ", "+
-//                        Float.toString(orientation[2]));
-            }
-        }
-
-//        mCustomDrawableView.invalidate();
     }
 }

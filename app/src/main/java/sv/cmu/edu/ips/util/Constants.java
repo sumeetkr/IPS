@@ -15,4 +15,5 @@ public class Constants {
     public static final String DATA_COLLECTION_FINISHED = "data collection finished";
     public static final String SENSOR_TYPE = "SensorType";
     public static final int DATA_COLLECT_LIST_ACTIVITY_REQUEST_CODE = 1;
+    public static final String NEW_DATA = "NEW_DATA";
 }

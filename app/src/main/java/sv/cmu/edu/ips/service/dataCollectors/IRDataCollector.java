@@ -78,9 +78,9 @@ public class IRDataCollector  extends SensorDataCollector implements ExtAudioRec
         }
     }
 
-    public List<ExtAudioRecorder.AudioReadResult> getData(){
-        return  dataList;
-    }
+//    public List<ExtAudioRecorder.AudioReadResult> getData(){
+//        return  dataList;
+//    }
 
     protected void writeDataToFile(String dataFileName, List<IJsonObject> data) {
         if(dataRecorder != null){

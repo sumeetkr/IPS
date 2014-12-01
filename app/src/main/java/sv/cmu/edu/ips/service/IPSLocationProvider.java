@@ -15,6 +15,7 @@ import com.google.android.gms.maps.LocationSource;
 public class IPSLocationProvider implements LocationSource, LocationListener {
         private OnLocationChangedListener listener;
         private LocationManager locationManager;
+        private Location lastLocation;
 
         public IPSLocationProvider(Context context)
         {
@@ -49,11 +50,7 @@ public class IPSLocationProvider implements LocationSource, LocationListener {
         {
             if(listener != null)
             {
-                Location improvedLocation = new Location("IPS");
-                improvedLocation.setAccuracy((float) 4.00);
-                improvedLocation.setLatitude(37.4121702);
-                improvedLocation.setLongitude(-122.0585952);
-                listener.onLocationChanged(improvedLocation);
+                listener.onLocationChanged(location);
             }
         }
 

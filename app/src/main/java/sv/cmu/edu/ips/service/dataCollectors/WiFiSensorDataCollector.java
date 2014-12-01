@@ -47,6 +47,11 @@ public class WiFiSensorDataCollector extends SensorDataCollector implements Prob
         Logger.log(getName() + "Data collection completed");
     }
 
+    @Override
+    public List<IJsonObject> getData(){
+        return data;
+    }
+
     private void registerProbe(Gson gson) {
         wifiProbe = gson.fromJson(new JsonObject(), WifiProbe.class);
         wifiProbe.registerListener(this);

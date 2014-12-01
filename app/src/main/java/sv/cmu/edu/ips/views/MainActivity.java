@@ -4,25 +4,20 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import java.util.Locale;
 
@@ -37,7 +32,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     ViewPager mViewPager;
     private IRDataGathererService mBoundService;
     private boolean mIsBound;
-    private BroadcastReceiver mMessageReceiver;
     private String deviceId;
     public static android.support.v4.app.FragmentManager fragmentManager;
 
@@ -82,8 +76,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
         TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
         deviceId = telephonyManager.getDeviceId();
-        mMessageReceiver = new NewBeaconReceiver(new Handler(), deviceId);
-
     }
 
 
@@ -227,19 +219,12 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     @Override
     public void onResume() {
         doBindService();
-        // Register mMessageReceiver to receive messages.
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
-                new IntentFilter("my-event"));
-
         super.onResume();
     }
 
     @Override
     protected void onPause() {
-        // Unregister since the activity is not visible
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
         doUnbindService();
-
         super.onPause();
     }
 
@@ -247,52 +232,12 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
           return getSupportFragmentManager();
     }
 
-    protected void onNewBeaconFound(String beaconId){
-//        SignalFragment signalFrag = (SignalFragment)getFragmentManager().findFragmentById(1);
-//        BeaconsFragment signalFrag = (BeaconsFragment) mSectionsPagerAdapter.getItem(2);
-//        if(signalFrag != null){
-//            signalFrag.updateNewBeaconId(beaconId);
-//        }
-    }
-
-    public class NewBeaconReceiver extends BroadcastReceiver {
-        private final Handler handler;
-        private final String deviceId;
-        private String lastSentBeaconId ="";
-
-        public NewBeaconReceiver(Handler handler, String deviceId) {
-            this.handler = handler;
-            this.deviceId = deviceId;
-        }
-
-        @Override
-        public void onReceive(final Context context, Intent intent) {
-            // Extract data included in the Intent
-            final String beaconId = intent.getStringExtra("message");
-
-            if(beaconId != null && !beaconId.isEmpty() ){ //&& beaconId.compareTo(lastSentBeaconId)!=0
-                // Post the UI updating code to our Handler
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(context, "Found Beacon: " + beaconId, Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-                onNewBeaconFound(beaconId);
-//                sendNewBeaconIdToServer(context, beaconId);
-                lastSentBeaconId = beaconId;
-            }
-        }
-
-//        private void sendNewBeaconIdToServer(Context context, String beaconId) {
-//            ScannerData data = new ScannerData();
-//            data.setBeaconId(beaconId);
-//            data.setIdentifier(this.deviceId);
-//            Log.d("Sending Json ", data.getJSON());
-//            IPSHttpClient.sendToServer(data.getJSON(), context, Constants.URL_TO_SEND_SCANNER_DATA);
-//            Log.d("receiver", "Sent beacon id: " + beaconId);
-//        }
-    };
+//    protected void onNewBeaconFound(String beaconId){
+////        SignalFragment signalFrag = (SignalFragment)getFragmentManager().findFragmentById(1);
+////        BeaconsFragment signalFrag = (BeaconsFragment) mSectionsPagerAdapter.getItem(2);
+////        if(signalFrag != null){
+////            signalFrag.updateNewBeaconId(beaconId);
+////        }
+//    }
 
 }

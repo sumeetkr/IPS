@@ -57,6 +57,10 @@ public class SensorDataCollector {
 
     }
 
+    public List<IJsonObject> getData(){
+        return null;
+    }
+
     public  void collectData(Context context, Gson gson, boolean toBeWritten){
         this.context = context;
         dataToBeWrittenToFile = toBeWritten;

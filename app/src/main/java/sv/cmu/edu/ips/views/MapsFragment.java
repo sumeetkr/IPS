@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -26,10 +27,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import sv.cmu.edu.ips.R;
-import sv.cmu.edu.ips.data.BeaconData;
+import sv.cmu.edu.ips.data.LabelData;
 import sv.cmu.edu.ips.service.IPSLocationProvider;
 import sv.cmu.edu.ips.util.Constants;
-import sv.cmu.edu.ips.util.IPSHttpClient;
+import sv.cmu.edu.ips.util.Logger;
 
 public class MapsFragment extends Fragment {
 
@@ -44,6 +45,8 @@ public class MapsFragment extends Fragment {
     private static Double latitude, longitude;
     private String label;
     private Handler handler;
+    private TextView locationText;
+    private IPSLocationProvider locationProvider;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -52,12 +55,13 @@ public class MapsFragment extends Fragment {
             return null;
         }
         view = (RelativeLayout) inflater.inflate(R.layout.fragment_map, container, false);
+        locationText = (TextView) view.findViewById(R.id.txtLocation);
 //        latitude = 37.410372;
 //        longitude = -122.059683;
 
         createMapIfNeeded(); // For setting up the MapFragment
         handler = new Handler();
-        mMessageReceiver = new NewBeaconReceiver(handler);
+        mMessageReceiver = new NewLabelReceiver(handler);
         return view;
     }
 
@@ -95,7 +99,8 @@ public class MapsFragment extends Fragment {
                     .findFragmentById(R.id.map)).getMap();
 
             map.setMyLocationEnabled(true);
-            map.setLocationSource(new IPSLocationProvider(getActivity()));
+            locationProvider= new IPSLocationProvider(getActivity());
+            map.setLocationSource(locationProvider);
 
             map.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
 
@@ -124,15 +129,6 @@ public class MapsFragment extends Fragment {
         createMapIfNeeded();
     }
 
-    private void sendNewBeaconIdToServer(Context context) {
-        if(beaconId != null && !beaconId.isEmpty() && label != null && !label.isEmpty()
-                && String.valueOf(latitude) != null && !String.valueOf(longitude).isEmpty()){
-            BeaconData data = new BeaconData(beaconId,String.valueOf(latitude), String.valueOf(longitude),label);
-            Log.d("Sending beacon json info", data.getJSON());
-            IPSHttpClient.sendToServer(data.getJSON(), context, Constants.URL_TO_SEND_BEACON_DATA);
-            Log.d("receiver", "Sent beacon json for " + beaconId);
-        }
-    }
     /**** The mapfragment's id must be removed from the FragmentManager
      **** or else if the same it is passed on the next time then
      **** app will crash ****/
@@ -159,7 +155,8 @@ public class MapsFragment extends Fragment {
         updateMapWithCurrentInfo();
         // Register mMessageReceiver to receive messages.
         LocalBroadcastManager.getInstance(this.getActivity().getApplicationContext()).registerReceiver(mMessageReceiver,
-                new IntentFilter("my-event"));
+                new IntentFilter(Constants.NEW_DATA));
+
         updateTextView();
     }
 
@@ -177,15 +174,16 @@ public class MapsFragment extends Fragment {
 //        Log.d("IPS", "Setting up beacon id :" + beaconId);
 //        TextView beaconIdText = (TextView)this.getView().findViewById(R.id.beaconId);
 //        beaconIdText.setText(BEACON_ID + beaconId);
+
+        locationText.setText("Location: I know it now");
+    }
+
+    public void updateLabel(LabelData label) {
+        locationText.setText("Your location: " + label.getRoomInfo());
     }
 
     public interface OnFragmentInteractionListener {
         public void onFragmentInteraction(Uri uri);
-    }
-
-    public void updateNewBeaconId(String beaconId){
-        Log.d("IPS", "Updating new beacon id :" + beaconId);
-        this.beaconId = beaconId;
     }
 
     public void addMarker(LatLng latlng){
@@ -200,11 +198,12 @@ public class MapsFragment extends Fragment {
 //        editText.setFocusable(true);
 
     }
-    public class NewBeaconReceiver extends BroadcastReceiver {
+
+    public class NewLabelReceiver extends BroadcastReceiver {
         private final Handler handler;
         private String lastSentBeaconId ="";
 
-        public NewBeaconReceiver(Handler handler) {
+        public NewLabelReceiver(Handler handler) {
             this.handler = handler;
         }
 
@@ -212,20 +211,53 @@ public class MapsFragment extends Fragment {
         public void onReceive(final Context context, Intent intent) {
             // Extract data included in the Intent
             final String beaconId = intent.getStringExtra("message");
+            final LabelData label = (LabelData) intent.getSerializableExtra("LabelData");
 
-            if(beaconId != null && !beaconId.isEmpty() && beaconId.compareTo(lastSentBeaconId)!=0){
+            if(beaconId != null && !beaconId.isEmpty() ){ //&& beaconId.compareTo(lastSentBeaconId)!=0
                 // Post the UI updating code to our Handler
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        updateNewBeaconId(beaconId);
-                        updateTextView();
+                        Toast.makeText(context, "Found Beacon: " + beaconId, Toast.LENGTH_SHORT).show();
                     }
                 });
+                lastSentBeaconId = beaconId;
+            }else{
+                try{
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(label!= null && label.getLat()!=0 && label.getLng()!=0){
+                                Location improvedLocation = new Location("IPS");
+//                                improvedLocation.setAccuracy((float) 4.00);
+                                improvedLocation.setLatitude(label.getLat());
+                                improvedLocation.setLongitude(label.getLng());
+
+                                locationProvider.onLocationChanged(improvedLocation);
+                            }
+
+                            if(label!= null && !label.getRoomInfo().isEmpty()){
+                                updateLabel(label);
+                            }
+//                            updateTextView();
+                        }
+                    });
+                }catch(Exception ex){
+                    Logger.log(ex.getMessage());
+                }
             }
         }
 
+//        private void sendNewBeaconIdToServer(Context context, String beaconId) {
+//            ScannerData data = new ScannerData();
+//            data.setBeaconId(beaconId);
+//            data.setIdentifier(this.deviceId);
+//            Log.d("Sending Json ", data.getJSON());
+//            IPSHttpClient.sendToServer(data.getJSON(), context, Constants.URL_TO_SEND_SCANNER_DATA);
+//            Log.d("receiver", "Sent beacon id: " + beaconId);
+//        }
     };
+
 
     public class TouchListener implements com.google.android.gms.maps.GoogleMap.OnMapClickListener{
 

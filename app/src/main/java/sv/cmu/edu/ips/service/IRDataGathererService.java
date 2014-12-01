@@ -2,17 +2,26 @@ package sv.cmu.edu.ips.service;
 
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
+import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
+import java.util.List;
 
 import sv.cmu.edu.ips.R;
+import sv.cmu.edu.ips.data.ClassificationData;
+import sv.cmu.edu.ips.data.LabelData;
+import sv.cmu.edu.ips.learners.WiFiProximityLearner;
 import sv.cmu.edu.ips.service.dataCollectors.AudioDataCollector;
+import sv.cmu.edu.ips.service.dataCollectors.WiFiSensorDataCollector;
+import sv.cmu.edu.ips.util.Constants;
+import sv.cmu.edu.ips.util.IPSFileReader;
 import sv.cmu.edu.ips.util.Logger;
 
 import static android.widget.Toast.LENGTH_SHORT;
@@ -27,10 +36,16 @@ public class IRDataGathererService extends Service {
     private boolean isRecording = false;
     private  boolean isListening = false;
     private Handler handler;
-    private AudioDataCollector dataRecorder;
+    private AudioDataCollector audioDataCollector;
+    private WiFiSensorDataCollector wiFiDataCollector;
     private String logLabel = "IRDataGathererService";
     private boolean isDataToBeWrittenToFile = false;
-    private Runnable runnable;
+    private Runnable runnableStartLookingForData;
+    private  String beaconId ="";
+    private IPSDataGatherer dataGatherer;
+    private List<ClassificationData> previouslyCollectedData;
+    private int  previouslyCollectedDataCount=0;
+    private Runnable runnableGetClassifierData;
 
 
     public IRDataGathererService() {
@@ -53,8 +68,18 @@ public class IRDataGathererService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        runnableGetClassifierData = new Runnable() {
+            @Override
+            public void run() {
+                previouslyCollectedData = IPSFileReader.getClassificationData();
+                previouslyCollectedDataCount = IPSFileReader.getCountOfDataCollected();
+            }
+        };
+
+        runnableGetClassifierData.run();
+
         handler = new Handler();
-        handler.postDelayed(runnable, 100);
+        handler.postDelayed(runnableStartLookingForData, 100);
 
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
@@ -74,8 +99,12 @@ public class IRDataGathererService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        IntentFilter intentFilter = new IntentFilter(Constants.DATA_COLLECTION_FINISHED);
+        this.registerReceiver(dataCollectionBroadcastReceiver, intentFilter);
+
         isListening = true;
-        runnable = new Runnable() {
+
+        runnableStartLookingForData = new Runnable() {
             @Override
             public void run() {
                 if(isListening){
@@ -85,7 +114,7 @@ public class IRDataGathererService extends Service {
                         Logger.log("Recording started! :");
 //                    }
                     //stop recording in 200ms
-                    handler.postDelayed(this, 3000);
+                    handler.postDelayed(this, 5000);
                 }
             }
         };
@@ -95,8 +124,10 @@ public class IRDataGathererService extends Service {
 
     @Override
     public  boolean onUnbind(Intent intent){
+        this.unregisterReceiver(dataCollectionBroadcastReceiver);
+
         isListening= false;
-        runnable = null;
+        runnableStartLookingForData = null;
         return true;
     }
 
@@ -108,8 +139,40 @@ public class IRDataGathererService extends Service {
     }
 
     private void startCollecting() {
-        dataRecorder = new AudioDataCollector("1", "AudioData");
-        dataRecorder.collectData(getApplicationContext(), new Gson(), false);
-        Log.d(logLabel, "started recording");
+
+        dataGatherer = new IPSDataGatherer(getApplicationContext());
+        dataGatherer.startCollecting();
+        Logger.log("started previouslyCollectedData collection");
     }
+
+    private BroadcastReceiver dataCollectionBroadcastReceiver = new BroadcastReceiver(){
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String collectorName = intent.getStringExtra(Constants.SENSOR_TYPE);
+            if(intent.hasExtra("beaconId")){
+                beaconId = intent.getStringExtra("beaconId");
+            }else{
+                //for now only collecting WiFi
+                if(dataGatherer!= null){
+                   ClassificationData newClassificationData = dataGatherer.getClassificationData();
+                   if(newClassificationData.getWifiData() != null){
+                       LabelData label = WiFiProximityLearner.findNearestLabel(
+                                previouslyCollectedData,
+                               newClassificationData);
+
+                       Intent newIntent = new Intent(Constants.NEW_DATA);
+                       newIntent.putExtra("LabelData", label);
+                       LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(newIntent);
+                   }
+
+                    if(previouslyCollectedDataCount != IPSFileReader.getCountOfDataCollected()){
+                        runnableGetClassifierData.run();
+                    }
+                }
+            }
+
+            Logger.log("Service received finish of " + collectorName);
+        }
+    };
 }

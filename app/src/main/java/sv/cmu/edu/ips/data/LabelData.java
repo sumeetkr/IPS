@@ -2,14 +2,16 @@ package sv.cmu.edu.ips.data;
 
 import com.google.gson.Gson;
 
+import java.io.Serializable;
+
 /**
  * Created by sumeet on 11/29/14.
  */
-public class LabelData {
+public class LabelData implements Serializable {
 
     private String roomInfo;
-    private double lat;
-    private double lng;
+    private double lat =0;
+    private double lng =0;
     private double x;
     private double y;
     private String beaconId;

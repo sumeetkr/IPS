@@ -11,6 +11,7 @@ import java.util.Arrays;
 
 import sv.cmu.edu.ips.data.AudioData;
 import sv.cmu.edu.ips.data.SignalData;
+import sv.cmu.edu.ips.util.Constants;
 import sv.cmu.edu.ips.util.IPSFileWriter;
 import sv.cmu.edu.ips.util.Logger;
 import sv.cmu.edu.ips.util.SignalAnalyzer;
@@ -63,7 +64,7 @@ public class AudioDataCollector extends SensorDataCollector {
 
                     if(!beaconId.isEmpty() && beaconId.length()>5){
                         anyBeaconId = beaconId;
-                        Intent intent = new Intent("my-event");
+                        Intent intent = new Intent(Constants.NEW_DATA);
                         intent.putExtra("message", beaconId);
                         LocalBroadcastManager.getInstance(ctxt).sendBroadcast(intent);
                     }
