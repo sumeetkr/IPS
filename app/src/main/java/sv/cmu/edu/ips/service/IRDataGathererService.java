@@ -17,6 +17,7 @@ import java.util.List;
 import sv.cmu.edu.ips.R;
 import sv.cmu.edu.ips.data.ClassificationData;
 import sv.cmu.edu.ips.data.LabelData;
+import sv.cmu.edu.ips.learners.WekaKNNClassifier;
 import sv.cmu.edu.ips.learners.WiFiProximityLearner;
 import sv.cmu.edu.ips.service.dataCollectors.AudioDataCollector;
 import sv.cmu.edu.ips.service.dataCollectors.WiFiSensorDataCollector;
@@ -76,6 +77,9 @@ public class IRDataGathererService extends Service {
             }
         };
 
+//        JavaMLKNN.classify(JavaMLKNN.Classifiers.KNearestNeighbors);
+
+        WekaKNNClassifier.classify();
         runnableGetClassifierData.run();
 
         handler = new Handler();

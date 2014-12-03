@@ -30,6 +30,8 @@ android {
     }
     dexOptions {
         preDexLibraries = false
+        incremental true
+        javaMaxHeapSize "4g"
     }
     productFlavors {
     }
@@ -46,4 +48,7 @@ dependencies {
     compile 'com.google.android.gms:play-services:6.1.71'
     compile 'com.android.support:support-v4:20.0.0'
     compile files('libs/funf-v0.5.0RC1.jar')
+    compile files('libs/wekaSTRIPPED.jar')
+    compile files('libs/javaml-0.1.7.jar')
+    compile files('libs/ajt-2.9.jar')
 }
