@@ -28,7 +28,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import sv.cmu.edu.ips.R;
 import sv.cmu.edu.ips.data.LabelData;
-import sv.cmu.edu.ips.service.IPSLocationProvider;
+import sv.cmu.edu.ips.service.WEALocationProvider;
 import sv.cmu.edu.ips.util.Constants;
 import sv.cmu.edu.ips.util.Logger;
 
@@ -46,7 +46,7 @@ public class MapsFragment extends Fragment {
     private String label;
     private Handler handler;
     private TextView locationText;
-    private IPSLocationProvider locationProvider;
+    private WEALocationProvider locationProvider;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -99,7 +99,7 @@ public class MapsFragment extends Fragment {
                     .findFragmentById(R.id.map)).getMap();
 
             map.setMyLocationEnabled(true);
-            locationProvider= new IPSLocationProvider(getActivity());
+            locationProvider= new WEALocationProvider(getActivity());
             map.setLocationSource(locationProvider);
 
             map.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
@@ -229,7 +229,7 @@ public class MapsFragment extends Fragment {
                         public void run() {
                             if(label!= null && label.getLat()!=0 && label.getLng()!=0){
                                 Location improvedLocation = new Location("IPS");
-//                                improvedLocation.setAccuracy((float) 4.00);
+                                improvedLocation.setAccuracy((float) label.getAccuracyInMeter());
                                 improvedLocation.setLatitude(label.getLat());
                                 improvedLocation.setLongitude(label.getLng());
 

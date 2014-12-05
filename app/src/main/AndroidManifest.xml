@@ -44,7 +44,7 @@
             android:parentActivityName="sv.cmu.edu.ips.views.DataCollectListActivity">
         </activity>
         <service
-            android:name="sv.cmu.edu.ips.service.IRDataGathererService"
+            android:name=".service.DataGathererService"
             android:enabled="true"
             android:exported="true" >
         </service>

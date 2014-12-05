@@ -17,6 +17,7 @@ import java.util.List;
 import sv.cmu.edu.ips.R;
 import sv.cmu.edu.ips.data.ClassificationData;
 import sv.cmu.edu.ips.data.LabelData;
+import sv.cmu.edu.ips.learners.IRProximityLearner;
 import sv.cmu.edu.ips.learners.WekaKNNClassifier;
 import sv.cmu.edu.ips.learners.WiFiProximityLearner;
 import sv.cmu.edu.ips.service.dataCollectors.AudioDataCollector;
@@ -27,7 +28,7 @@ import sv.cmu.edu.ips.util.Logger;
 
 import static android.widget.Toast.LENGTH_SHORT;
 
-public class IRDataGathererService extends Service {
+public class DataGathererService extends Service {
 
     private NotificationManager mNM;
     private int NOTIFICATION = R.string.local_service_started;
@@ -43,19 +44,19 @@ public class IRDataGathererService extends Service {
     private boolean isDataToBeWrittenToFile = false;
     private Runnable runnableStartLookingForData;
     private  String beaconId ="";
-    private IPSDataGatherer dataGatherer;
+    private DataGatherer dataGatherer;
     private List<ClassificationData> previouslyCollectedData;
     private int  previouslyCollectedDataCount=0;
     private Runnable runnableGetClassifierData;
 
 
-    public IRDataGathererService() {
+    public DataGathererService() {
         isRecording = false;
     }
 
     public class LocalBinder extends Binder {
-        public IRDataGathererService getService() {
-            return IRDataGathererService.this;
+        public DataGathererService getService() {
+            return DataGathererService.this;
         }
     }
 
@@ -72,6 +73,7 @@ public class IRDataGathererService extends Service {
         runnableGetClassifierData = new Runnable() {
             @Override
             public void run() {
+                Logger.log("Starting learner model building");
                 previouslyCollectedData = IPSFileReader.getClassificationData();
                 previouslyCollectedDataCount = IPSFileReader.getCountOfDataCollected();
             }
@@ -144,7 +146,7 @@ public class IRDataGathererService extends Service {
 
     private void startCollecting() {
 
-        dataGatherer = new IPSDataGatherer(getApplicationContext());
+        dataGatherer = new DataGatherer(getApplicationContext());
         dataGatherer.startCollecting();
         Logger.log("started previouslyCollectedData collection");
     }
@@ -153,15 +155,19 @@ public class IRDataGathererService extends Service {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            LabelData label = null;
             String collectorName = intent.getStringExtra(Constants.SENSOR_TYPE);
             if(intent.hasExtra("beaconId")){
                 beaconId = intent.getStringExtra("beaconId");
+                if(!beaconId.isEmpty()){
+                    label = IRProximityLearner.findNearestLabel(previouslyCollectedData, beaconId);
+                }
             }else{
                 //for now only collecting WiFi
                 if(dataGatherer!= null){
                    ClassificationData newClassificationData = dataGatherer.getClassificationData();
                    if(newClassificationData.getWifiData() != null){
-                       LabelData label = WiFiProximityLearner.findNearestLabel(
+                       label = WiFiProximityLearner.findNearestLabel(
                                 previouslyCollectedData,
                                newClassificationData);
 
@@ -174,6 +180,12 @@ public class IRDataGathererService extends Service {
                         runnableGetClassifierData.run();
                     }
                 }
+            }
+
+            if(label != null){
+                Intent newIntent = new Intent(Constants.NEW_DATA);
+                newIntent.putExtra("LabelData", label);
+                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(newIntent);
             }
 
             Logger.log("Service received finish of " + collectorName);

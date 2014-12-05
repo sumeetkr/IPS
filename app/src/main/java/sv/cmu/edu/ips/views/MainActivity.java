@@ -22,7 +22,7 @@ import android.view.MenuItem;
 import java.util.Locale;
 
 import sv.cmu.edu.ips.R;
-import sv.cmu.edu.ips.service.IRDataGathererService;
+import sv.cmu.edu.ips.service.DataGathererService;
 import sv.cmu.edu.ips.util.Logger;
 
 
@@ -30,7 +30,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
     SectionsPagerAdapter mSectionsPagerAdapter;
     ViewPager mViewPager;
-    private IRDataGathererService mBoundService;
+    private DataGathererService mBoundService;
     private boolean mIsBound;
     private String deviceId;
     public static android.support.v4.app.FragmentManager fragmentManager;
@@ -173,7 +173,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
             // interact with the service.  Because we have bound to a explicit
             // service that we know is running in our own process, we can
             // cast its IBinder to a concrete class and directly access it.
-            mBoundService = ((IRDataGathererService.LocalBinder)service).getService();
+            mBoundService = ((DataGathererService.LocalBinder)service).getService();
             Intent startServiceIntent = new Intent();
             mBoundService.onStartCommand(startServiceIntent,0,0);
             Log.d(Logger.TAG," Service Connected and started");
@@ -194,7 +194,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
     void doBindService() {
         bindService(new Intent(this,
-                IRDataGathererService.class),
+                DataGathererService.class),
                 mConnection,
                 Context.BIND_AUTO_CREATE);
         mIsBound = true;
@@ -203,7 +203,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     void doUnbindService() {
         if (mIsBound) {
             stopService(new Intent(this,
-                    IRDataGathererService.class));
+                    DataGathererService.class));
             // Detach our existing connection.
             unbindService(mConnection);
             mIsBound = false;

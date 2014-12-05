@@ -30,7 +30,7 @@ import sv.cmu.edu.ips.util.Logger;
 /**
  * Created by sumeet on 11/30/14.
  */
-public class IPSDataGatherer {
+public class DataGatherer {
 
     private Context context;
     private String beaconIdFound="";
@@ -40,7 +40,7 @@ public class IPSDataGatherer {
     private BasicPipeline pipeline;
     private ServiceConnection funfManagerConn;
 
-    public IPSDataGatherer(Context context){
+    public DataGatherer(Context context){
         this.context = context;
         listOfProbesWhichFinishedDataCollection = new HashSet<String>();
         probes = new ArrayList<SensorDataCollector>();

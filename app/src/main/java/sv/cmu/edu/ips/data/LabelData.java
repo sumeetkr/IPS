@@ -14,6 +14,7 @@ public class LabelData implements Serializable {
     private double lng =0;
     private double x;
     private double y;
+    private double accuracyInMeter=30;
     private String beaconId;
 
     public String getRoomInfo() {
@@ -62,6 +63,14 @@ public class LabelData implements Serializable {
 
     public void setBeaconId(String beaconId) {
         this.beaconId = beaconId;
+    }
+
+    public double getAccuracyInMeter() {
+        return accuracyInMeter;
+    }
+
+    public void setAccuracyInMeter(double accuracyInMeter) {
+        this.accuracyInMeter = accuracyInMeter;
     }
 
     public class Orientation{
