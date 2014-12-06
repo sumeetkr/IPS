@@ -38,34 +38,34 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginBottom="4dp"
                 android:textOff="GPS"
-                android:textOn="GPS 20m"
-                android:id="@+id/txtSignalStrengthIPS"/>
+                android:textOn="GPS"
+                android:id="@+id/btnGPS"/>
 
             <ToggleButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="7dp"
-                android:id="@+id/txtSignalStrengthIR"
-                android:layout_toRightOf="@+id/txtSignalStrengthIPS"
+                android:id="@+id/btnIR"
+                android:layout_toRightOf="@+id/btnGPS"
                 android:text="Infrared : 2m"
                 android:textOff="Infrared"
-                android:textOn="Infrared 10m"/>
+                android:textOn="Infrared"/>
             <ToggleButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="7dp"
-                android:id="@+id/txtSignalStrengthWiFi"
-                android:layout_toRightOf="@+id/txtSignalStrengthIR"
+                android:id="@+id/btnWiFi"
+                android:layout_toRightOf="@+id/btnIR"
                 android:textOff="WiFi"
-                android:textOn="WiFi 3m"/>
+                android:textOn="WiFi"/>
             <ToggleButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="7dp"
-                android:id="@+id/txtSignalStrengthMagnetic"
-                android:layout_toRightOf="@+id/txtSignalStrengthWiFi"
-                android:textOff="H Field"
-                android:textOn="H Field 3m"/>
+                android:id="@+id/btnCompass"
+                android:layout_toRightOf="@+id/btnWiFi"
+                android:textOff="Compass"
+                android:textOn="Compass"/>
         </RelativeLayout>
     </LinearLayout>
 

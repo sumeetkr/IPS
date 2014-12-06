@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -32,6 +33,8 @@ import sv.cmu.edu.ips.service.WEALocationProvider;
 import sv.cmu.edu.ips.util.Constants;
 import sv.cmu.edu.ips.util.Logger;
 
+import static sv.cmu.edu.ips.data.LabelData.Source;
+
 public class MapsFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
@@ -43,10 +46,14 @@ public class MapsFragment extends Fragment {
     private static View view;
     private static GoogleMap map;
     private static Double latitude, longitude;
-    private String label;
     private Handler handler;
     private TextView locationText;
     private WEALocationProvider locationProvider;
+    private ToggleButton btnGPS;
+    private ToggleButton btnIR;
+    private ToggleButton btnWiFi;
+    private ToggleButton btnCompass;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -56,6 +63,11 @@ public class MapsFragment extends Fragment {
         }
         view = (RelativeLayout) inflater.inflate(R.layout.fragment_map, container, false);
         locationText = (TextView) view.findViewById(R.id.txtLocation);
+        btnGPS = (ToggleButton) view.findViewById(R.id.btnGPS);
+        btnIR = (ToggleButton) view.findViewById(R.id.btnIR);
+        btnWiFi = (ToggleButton) view.findViewById(R.id.btnWiFi);
+        btnCompass = (ToggleButton) view.findViewById(R.id.btnCompass);
+
 //        latitude = 37.410372;
 //        longitude = -122.059683;
 
@@ -99,7 +111,38 @@ public class MapsFragment extends Fragment {
                     .findFragmentById(R.id.map)).getMap();
 
             map.setMyLocationEnabled(true);
-            locationProvider= new WEALocationProvider(getActivity());
+            locationProvider= new WEALocationProvider(getActivity()){
+                @Override
+                public void onLocationChanged(Location location)
+                {
+                    super.onLocationChanged(location);
+
+                    if(getListener() != null)
+                    {
+                        final Location bestLocation = getBestLocation();
+                        if(bestLocation!= null && !bestLocation.getProvider().isEmpty()){
+                            try{
+                                Bundle extra = bestLocation.getExtras();
+                                if(extra!= null && extra.containsKey("label")){
+                                    final String room =  extra.getString("label");
+                                    if(room!= null && !room.isEmpty()){
+                                        handler.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                updateLocationInfo(room , bestLocation);
+                                            }
+                                        });
+                                    }
+                                }
+
+                            }catch (Exception ex){
+                                Logger.log(ex.getMessage());
+                            }
+                            getListener().onLocationChanged(bestLocation);
+                        }
+                    }
+                }
+            };
             map.setLocationSource(locationProvider);
 
             map.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
@@ -116,7 +159,6 @@ public class MapsFragment extends Fragment {
                         map.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation,
                                 20));
                     }
-
                     // Remove listener to prevent position reset on camera move.
                     map.setOnCameraChangeListener(null);
                 }
@@ -175,11 +217,35 @@ public class MapsFragment extends Fragment {
 //        TextView beaconIdText = (TextView)this.getView().findViewById(R.id.beaconId);
 //        beaconIdText.setText(BEACON_ID + beaconId);
 
-        locationText.setText("Location: I know it now");
+        locationText.setText("Location: NA, Go to menu to collect data.");
     }
 
-    public void updateLabel(LabelData label) {
-        locationText.setText("Your location: " + label.getRoomInfo());
+    public void updateLocationInfo(String room, Location location) {
+        locationText.setText("Your location: " +room + "    Accuracy: " + location.getAccuracy() + "m");
+        Source source =  LabelData.getSourceFromString(location.getProvider());
+
+        btnGPS.setChecked(false);
+        btnIR.setChecked(false);
+        btnWiFi.setChecked(false);
+        btnCompass.setChecked(false);
+
+        switch (source){
+            case GPS:
+                btnGPS.setChecked(true);
+                break;
+
+            case WiFi:
+                btnWiFi.setChecked(true);
+                break;
+
+            case Compass:
+                btnCompass.setChecked(true);
+                break;
+
+            case IR:
+                btnIR.setChecked(true);
+                break;
+        }
     }
 
     public interface OnFragmentInteractionListener {
@@ -232,14 +298,14 @@ public class MapsFragment extends Fragment {
                                 improvedLocation.setAccuracy((float) label.getAccuracyInMeter());
                                 improvedLocation.setLatitude(label.getLat());
                                 improvedLocation.setLongitude(label.getLng());
+                                improvedLocation.setProvider(label.getBestSource().name());
+
+                                Bundle bundle = new Bundle();
+                                bundle.putString("label", label.getRoomInfo());
+                                improvedLocation.setExtras(bundle);
 
                                 locationProvider.onLocationChanged(improvedLocation);
                             }
-
-                            if(label!= null && !label.getRoomInfo().isEmpty()){
-                                updateLabel(label);
-                            }
-//                            updateTextView();
                         }
                     });
                 }catch(Exception ex){

@@ -24,8 +24,12 @@ public class IRProximityLearner {
              }
             }
         }
+
         //lets assume IR has 4 meter accuracy
-        if(closestlabel != null) closestlabel.setAccuracyInMeter(4);
+        if(closestlabel != null) {
+            closestlabel.setAccuracyInMeter(4);
+            closestlabel.setBestSource(LabelData.Source.IR);
+        }
         return  closestlabel;
     }
 }

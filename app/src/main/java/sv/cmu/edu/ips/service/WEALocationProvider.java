@@ -29,7 +29,7 @@ public class WEALocationProvider implements LocationSource, LocationListener {
                 protected boolean removeEldestEntry(Map.Entry<Long, Location> eldest)
 
                 {
-                    return this.size() > 20;
+                    return this.size() > 10;
                 }
             };
         }
@@ -61,10 +61,6 @@ public class WEALocationProvider implements LocationSource, LocationListener {
         public void onLocationChanged(Location location)
         {
             locationInfoQueque.put(System.currentTimeMillis(), location);
-            if(listener != null)
-            {
-                listener.onLocationChanged(location);
-            }
         }
 
         @Override
@@ -86,5 +82,20 @@ public class WEALocationProvider implements LocationSource, LocationListener {
         {
             // TODO Auto-generated method stub
 
+        }
+
+        public Location getBestLocation(){
+            Location bestLocation =null;
+            for(Location location:locationInfoQueque.values()){
+                if(bestLocation == null || (bestLocation != null && location.getAccuracy() <= bestLocation.getAccuracy())){
+                    bestLocation = location;
+                }
+            }
+
+            return  bestLocation;
+        }
+
+        public OnLocationChangedListener getListener(){
+            return  listener;
         }
 }

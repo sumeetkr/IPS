@@ -24,7 +24,10 @@ public class WiFiProximityLearner {
             }
         }
         //lets assume WIFI has 3 meter accuracy
-        if(bestLabel != null)  bestLabel.setAccuracyInMeter(3);
+        if(bestLabel != null)  {
+            bestLabel.setAccuracyInMeter(3);
+            bestLabel.setBestSource(LabelData.Source.WiFi);
+        }
         return bestLabel;
     }
 }

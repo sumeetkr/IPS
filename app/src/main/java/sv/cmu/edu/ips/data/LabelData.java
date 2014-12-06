@@ -16,6 +16,9 @@ public class LabelData implements Serializable {
     private double y;
     private double accuracyInMeter=30;
     private String beaconId;
+    private Source bestSource;
+
+    public enum Source{GPS,IR,WiFi,Compass};
 
     public String getRoomInfo() {
         return roomInfo;
@@ -71,6 +74,18 @@ public class LabelData implements Serializable {
 
     public void setAccuracyInMeter(double accuracyInMeter) {
         this.accuracyInMeter = accuracyInMeter;
+    }
+
+    public Source getBestSource() {
+        return bestSource;
+    }
+
+    public static Source getSourceFromString(String value){
+        return Source.valueOf(value);
+    }
+
+    public void setBestSource(Source bestSource) {
+        this.bestSource = bestSource;
     }
 
     public class Orientation{
