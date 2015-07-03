@@ -1,4 +1,4 @@
 IPS
 ===
 
-Indoor Positioning System using Infrared beacons and mobile phones with IR sensors.
+Open Source Indoor Positioning System using sensors like WiFi, BLuetooth, Micrpphone etc in a mobile phone.
